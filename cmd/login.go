@@ -22,7 +22,7 @@ package cmd
 
 import (
 	"fmt"
-
+	"github.com/flood-io/cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,10 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Authenticates with Flood so you can use the other commands",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("login called")
+		err := client.Login()
+		if err != nil {
+			fmt.Errorf("login command failed: %s", err.Error())
+		}
 	},
 }
 
