@@ -24,3 +24,6 @@ Flood account:
     Welcome back Ivan Vanderbyl!
 
 This will store a temporary authentication token on your machine.
+
+
+You can deregister this machine by running `flood logout` at any time.
