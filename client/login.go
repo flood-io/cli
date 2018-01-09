@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/google/go-querystring/query"
-	"github.com/tcnksm/go-input"
+	"github.com/pkg/errors"
 )
 
 type payload struct {
@@ -19,9 +19,31 @@ type payload struct {
 	GrantType string `url:"grant_type"`
 }
 
+/*
+ * {
+ *   "access_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+ *   "token_type": "bearer",
+ *   "expires_in": 1209600,
+ *   "refresh_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+ *   "scope": "admin",
+ *   "created_at": 1515462739,
+ *   "data": {
+ *     "id": "1",
+ *     "type": "users",
+ *     "links": {
+ *       "self": "/api/v3/users/1"
+ *     },
+ *     "attributes": {
+ *       "full-name": "Lachie Cox",
+ *       "company-name": "Flood IO"
+ *     }
+ *   }
+ * }
+ */
+
 type PasswordTokenResponse struct {
 	AccessToken string `json:"access_token"`
-	CreatedAt   int16  `json:"created_at"`
+	CreatedAt   int    `json:"created_at"`
 	Data        struct {
 		Id         string `json:"id"`
 		Attributes struct {
@@ -42,12 +64,11 @@ func GetAuthenticationFile() *PasswordTokenResponse {
 	return responsePayload
 }
 
-func Login() error {
+func Login() (err error) {
 	existingLogin := GetAuthenticationFile()
 	if existingLogin != nil {
-		fmt.Printf("You're already signed in as %s!",
-			existingLogin.Data.Attributes.FullName)
-		return nil
+		fmt.Printf("You're already signed in as %s!\n", existingLogin.Data.Attributes.FullName)
+		return
 	}
 
 	ui := &input.UI{
@@ -60,9 +81,8 @@ func Login() error {
 		Required: true,
 		Loop:     true,
 	})
-
 	if err != nil {
-		return err
+		return
 	}
 
 	password, err := ui.Ask("What's your password (masked):", &input.Options{
@@ -78,30 +98,31 @@ func Login() error {
 
 	body := strings.NewReader(v.Encode())
 	resp, err := http.DefaultClient.Post("https://flood.io/oauth/token", "application/x-www-form-urlencoded", body)
-
 	if err != nil {
-		fmt.Println(err.Error())
+		return
 	}
+
+	if resp.StatusCode != 200 {
+		var responseBody []byte
+		responseBody, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
+		return fmt.Errorf("Authentication failed: %d %s", resp.StatusCode, string(responseBody))
+	}
+
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err.Error())
+		return
 	}
 
-	responsePayload := &PasswordTokenResponse{}
-	json.Unmarshal(b, responsePayload)
-
-	if resp.StatusCode == 200 {
-		fmt.Printf("Welcome back %s!",
-			responsePayload.Data.Attributes.FullName)
-	} else {
-		fmt.Println("Authentication failed")
-	}
-
-	err = ioutil.WriteFile(filepath.Join(os.Getenv("HOME"), authenticationFile), b, 0600)
-
+	responsePayload := PasswordTokenResponse{}
+	err = json.Unmarshal(b, &responsePayload)
 	if err != nil {
-		fmt.Println(err.Error())
+		return errors.Wrapf(err, "unable to parse JSON response: (body=%s)", string(b))
 	}
 
-	return nil
+	fmt.Printf("Welcome back %s!\n", responsePayload.Data.Attributes.FullName)
+
+	return ioutil.WriteFile(filepath.Join(os.Getenv("HOME"), authenticationFile), b, 0600)
 }
