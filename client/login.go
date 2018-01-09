@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
+	input "github.com/tcnksm/go-input"
 )
 
 type payload struct {
