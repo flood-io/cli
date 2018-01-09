@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/flood-io/cli/cmd/bludev"
 	"github.com/spf13/cobra"
 )
@@ -12,7 +14,10 @@ var bluDevCmd = &cobra.Command{
 	Use:   "dev-blu",
 	Short: "Develop & debug yourflood BLU script",
 	Run: func(cmd *cobra.Command, args []string) {
-		bluDev.Run(args[0])
+		err := bluDev.Run(args[0])
+		if err != nil {
+			log.Fatalf("failed to run dev-blu %s", err)
+		}
 	},
 }
 

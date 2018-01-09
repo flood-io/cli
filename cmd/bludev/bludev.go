@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
+	"os"
 
 	pb "github.com/flood-io/cli/proto"
 	"google.golang.org/grpc"
@@ -22,9 +24,19 @@ func (t *testServer) Run(*pb.TestRequest, pb.Test_RunServer) error {
 
 var _ pb.TestServer = (*testServer)(nil)
 
-func (b *BLUDev) Run(scriptFile string) {
+func (b *BLUDev) Run(scriptFile string) (err error) {
 	fmt.Println("running dev-blu")
 	fmt.Printf("scriptFile = %+v\n", scriptFile)
+
+	f, err := os.Open(scriptFile)
+	if err != nil {
+		return
+	}
+
+	scriptBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return
+	}
 
 	serverAddr := "localhost:50051"
 
@@ -36,6 +48,7 @@ func (b *BLUDev) Run(scriptFile string) {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer conn.Close()
+
 	client := pb.NewTestClient(conn)
 
 	fmt.Printf("client = %+v\n", client)
@@ -43,7 +56,7 @@ func (b *BLUDev) Run(scriptFile string) {
 	test := &pb.TestRequest{
 		ClientID: "123",
 		Uuid:     "456",
-		Script:   []byte("hey its a script"),
+		Script:   string(scriptBytes),
 	}
 
 	fmt.Println("streaming")
@@ -59,8 +72,26 @@ func (b *BLUDev) Run(scriptFile string) {
 		if err != nil {
 			log.Fatalf("%v.Run(_) = _, %v", client, err)
 		}
-		fmt.Printf("result = %+v\n", result)
-		fmt.Printf("result = %T\n", result)
-		log.Println("result", result.String())
+
+		// fmt.Printf("result = %+v\n", result)
+		// fmt.Printf("result = %T\n", result)
+		// fmt.Println("result", result.String())
+
+		fmt.Println(result.Message)
+		// if logM := result.GetLog(); logM != nil {
+		// } else if errM := result.GetError(); errM != nil {
+		// fmt.Println(errM.Message)
+		// fmt.Println("stack:", errM.Stack)
+		// } else if completeM := result.GetComplete(); completeM != nil {
+		// fmt.Println("done:", completeM.Message)
+		// break
+		// } else {
+		// fmt.Println("result", result.String())
+		// }
+		if completeM := result.GetComplete(); completeM != nil {
+			break
+		}
 	}
+
+	return
 }

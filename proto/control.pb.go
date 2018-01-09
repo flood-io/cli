@@ -2,7 +2,7 @@
 // source: control.proto
 
 /*
-	Package control is a generated protocol buffer package.
+	Package floodchrome is a generated protocol buffer package.
 
 	It is generated from these files:
 		control.proto
@@ -10,10 +10,12 @@
 	It has these top-level messages:
 		TestRequest
 		TestResult
-		TestParseError
-		TestStepResult
+		TestResultLog
+		TestResultError
+		TestResultStep
+		TestResultComplete
 */
-package control
+package floodchrome
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
@@ -38,7 +40,7 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 type TestRequest struct {
 	ClientID string `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
 	Uuid     string `protobuf:"bytes,2,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	Script   []byte `protobuf:"bytes,3,opt,name=script,proto3" json:"script,omitempty"`
+	Script   string `protobuf:"bytes,3,opt,name=script,proto3" json:"script,omitempty"`
 }
 
 func (m *TestRequest) Reset()                    { *m = TestRequest{} }
@@ -60,17 +62,20 @@ func (m *TestRequest) GetUuid() string {
 	return ""
 }
 
-func (m *TestRequest) GetScript() []byte {
+func (m *TestRequest) GetScript() string {
 	if m != nil {
 		return m.Script
 	}
-	return nil
+	return ""
 }
 
 type TestResult struct {
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	// Types that are valid to be assigned to Result:
+	//	*TestResult_Log
 	//	*TestResult_Error
-	//	*TestResult_StepResult
+	//	*TestResult_Step
+	//	*TestResult_Complete
 	Result isTestResult_Result `protobuf_oneof:"result"`
 }
 
@@ -85,15 +90,23 @@ type isTestResult_Result interface {
 	Size() int
 }
 
-type TestResult_Error struct {
-	Error *TestParseError `protobuf:"bytes,1,opt,name=error,oneof"`
+type TestResult_Log struct {
+	Log *TestResultLog `protobuf:"bytes,2,opt,name=log,oneof"`
 }
-type TestResult_StepResult struct {
-	StepResult *TestStepResult `protobuf:"bytes,2,opt,name=step_result,json=stepResult,oneof"`
+type TestResult_Error struct {
+	Error *TestResultError `protobuf:"bytes,3,opt,name=error,oneof"`
+}
+type TestResult_Step struct {
+	Step *TestResultStep `protobuf:"bytes,4,opt,name=step,oneof"`
+}
+type TestResult_Complete struct {
+	Complete *TestResultComplete `protobuf:"bytes,5,opt,name=complete,oneof"`
 }
 
-func (*TestResult_Error) isTestResult_Result()      {}
-func (*TestResult_StepResult) isTestResult_Result() {}
+func (*TestResult_Log) isTestResult_Result()      {}
+func (*TestResult_Error) isTestResult_Result()    {}
+func (*TestResult_Step) isTestResult_Result()     {}
+func (*TestResult_Complete) isTestResult_Result() {}
 
 func (m *TestResult) GetResult() isTestResult_Result {
 	if m != nil {
@@ -102,16 +115,37 @@ func (m *TestResult) GetResult() isTestResult_Result {
 	return nil
 }
 
-func (m *TestResult) GetError() *TestParseError {
+func (m *TestResult) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *TestResult) GetLog() *TestResultLog {
+	if x, ok := m.GetResult().(*TestResult_Log); ok {
+		return x.Log
+	}
+	return nil
+}
+
+func (m *TestResult) GetError() *TestResultError {
 	if x, ok := m.GetResult().(*TestResult_Error); ok {
 		return x.Error
 	}
 	return nil
 }
 
-func (m *TestResult) GetStepResult() *TestStepResult {
-	if x, ok := m.GetResult().(*TestResult_StepResult); ok {
-		return x.StepResult
+func (m *TestResult) GetStep() *TestResultStep {
+	if x, ok := m.GetResult().(*TestResult_Step); ok {
+		return x.Step
+	}
+	return nil
+}
+
+func (m *TestResult) GetComplete() *TestResultComplete {
+	if x, ok := m.GetResult().(*TestResult_Complete); ok {
+		return x.Complete
 	}
 	return nil
 }
@@ -119,8 +153,10 @@ func (m *TestResult) GetStepResult() *TestStepResult {
 // XXX_OneofFuncs is for the internal use of the proto package.
 func (*TestResult) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
 	return _TestResult_OneofMarshaler, _TestResult_OneofUnmarshaler, _TestResult_OneofSizer, []interface{}{
+		(*TestResult_Log)(nil),
 		(*TestResult_Error)(nil),
-		(*TestResult_StepResult)(nil),
+		(*TestResult_Step)(nil),
+		(*TestResult_Complete)(nil),
 	}
 }
 
@@ -128,14 +164,24 @@ func _TestResult_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 	m := msg.(*TestResult)
 	// result
 	switch x := m.Result.(type) {
+	case *TestResult_Log:
+		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Log); err != nil {
+			return err
+		}
 	case *TestResult_Error:
-		_ = b.EncodeVarint(1<<3 | proto.WireBytes)
+		_ = b.EncodeVarint(3<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.Error); err != nil {
 			return err
 		}
-	case *TestResult_StepResult:
-		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.StepResult); err != nil {
+	case *TestResult_Step:
+		_ = b.EncodeVarint(4<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Step); err != nil {
+			return err
+		}
+	case *TestResult_Complete:
+		_ = b.EncodeVarint(5<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Complete); err != nil {
 			return err
 		}
 	case nil:
@@ -148,21 +194,37 @@ func _TestResult_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 func _TestResult_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
 	m := msg.(*TestResult)
 	switch tag {
-	case 1: // result.error
+	case 2: // result.log
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(TestParseError)
+		msg := new(TestResultLog)
+		err := b.DecodeMessage(msg)
+		m.Result = &TestResult_Log{msg}
+		return true, err
+	case 3: // result.error
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(TestResultError)
 		err := b.DecodeMessage(msg)
 		m.Result = &TestResult_Error{msg}
 		return true, err
-	case 2: // result.step_result
+	case 4: // result.step
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(TestStepResult)
+		msg := new(TestResultStep)
 		err := b.DecodeMessage(msg)
-		m.Result = &TestResult_StepResult{msg}
+		m.Result = &TestResult_Step{msg}
+		return true, err
+	case 5: // result.complete
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(TestResultComplete)
+		err := b.DecodeMessage(msg)
+		m.Result = &TestResult_Complete{msg}
 		return true, err
 	default:
 		return false, nil
@@ -173,14 +235,24 @@ func _TestResult_OneofSizer(msg proto.Message) (n int) {
 	m := msg.(*TestResult)
 	// result
 	switch x := m.Result.(type) {
-	case *TestResult_Error:
-		s := proto.Size(x.Error)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
+	case *TestResult_Log:
+		s := proto.Size(x.Log)
+		n += proto.SizeVarint(2<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *TestResult_StepResult:
-		s := proto.Size(x.StepResult)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
+	case *TestResult_Error:
+		s := proto.Size(x.Error)
+		n += proto.SizeVarint(3<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *TestResult_Step:
+		s := proto.Size(x.Step)
+		n += proto.SizeVarint(4<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *TestResult_Complete:
+		s := proto.Size(x.Complete)
+		n += proto.SizeVarint(5<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
 	case nil:
@@ -190,51 +262,78 @@ func _TestResult_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
-type TestParseError struct {
-	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Detail  []byte `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+type TestResultLog struct {
+	Level string `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
 }
 
-func (m *TestParseError) Reset()                    { *m = TestParseError{} }
-func (m *TestParseError) String() string            { return proto.CompactTextString(m) }
-func (*TestParseError) ProtoMessage()               {}
-func (*TestParseError) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{2} }
+func (m *TestResultLog) Reset()                    { *m = TestResultLog{} }
+func (m *TestResultLog) String() string            { return proto.CompactTextString(m) }
+func (*TestResultLog) ProtoMessage()               {}
+func (*TestResultLog) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{2} }
 
-func (m *TestParseError) GetMessage() string {
+func (m *TestResultLog) GetLevel() string {
 	if m != nil {
-		return m.Message
+		return m.Level
 	}
 	return ""
 }
 
-func (m *TestParseError) GetDetail() []byte {
+type TestResultError struct {
+	// bytes detail = 2;
+	Stack string `protobuf:"bytes,1,opt,name=stack,proto3" json:"stack,omitempty"`
+}
+
+func (m *TestResultError) Reset()                    { *m = TestResultError{} }
+func (m *TestResultError) String() string            { return proto.CompactTextString(m) }
+func (*TestResultError) ProtoMessage()               {}
+func (*TestResultError) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{3} }
+
+func (m *TestResultError) GetStack() string {
+	if m != nil {
+		return m.Stack
+	}
+	return ""
+}
+
+type TestResultStep struct {
+	Detail string `protobuf:"bytes,1,opt,name=detail,proto3" json:"detail,omitempty"`
+}
+
+func (m *TestResultStep) Reset()                    { *m = TestResultStep{} }
+func (m *TestResultStep) String() string            { return proto.CompactTextString(m) }
+func (*TestResultStep) ProtoMessage()               {}
+func (*TestResultStep) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{4} }
+
+func (m *TestResultStep) GetDetail() string {
 	if m != nil {
 		return m.Detail
 	}
-	return nil
+	return ""
 }
 
-type TestStepResult struct {
-	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+type TestResultComplete struct {
+	Detail string `protobuf:"bytes,1,opt,name=detail,proto3" json:"detail,omitempty"`
 }
 
-func (m *TestStepResult) Reset()                    { *m = TestStepResult{} }
-func (m *TestStepResult) String() string            { return proto.CompactTextString(m) }
-func (*TestStepResult) ProtoMessage()               {}
-func (*TestStepResult) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{3} }
+func (m *TestResultComplete) Reset()                    { *m = TestResultComplete{} }
+func (m *TestResultComplete) String() string            { return proto.CompactTextString(m) }
+func (*TestResultComplete) ProtoMessage()               {}
+func (*TestResultComplete) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{5} }
 
-func (m *TestStepResult) GetMessage() string {
+func (m *TestResultComplete) GetDetail() string {
 	if m != nil {
-		return m.Message
+		return m.Detail
 	}
 	return ""
 }
 
 func init() {
-	proto.RegisterType((*TestRequest)(nil), "control.TestRequest")
-	proto.RegisterType((*TestResult)(nil), "control.TestResult")
-	proto.RegisterType((*TestParseError)(nil), "control.TestParseError")
-	proto.RegisterType((*TestStepResult)(nil), "control.TestStepResult")
+	proto.RegisterType((*TestRequest)(nil), "floodchrome.TestRequest")
+	proto.RegisterType((*TestResult)(nil), "floodchrome.TestResult")
+	proto.RegisterType((*TestResultLog)(nil), "floodchrome.TestResultLog")
+	proto.RegisterType((*TestResultError)(nil), "floodchrome.TestResultError")
+	proto.RegisterType((*TestResultStep)(nil), "floodchrome.TestResultStep")
+	proto.RegisterType((*TestResultComplete)(nil), "floodchrome.TestResultComplete")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -260,7 +359,7 @@ func NewTestClient(cc *grpc.ClientConn) TestClient {
 }
 
 func (c *testClient) Run(ctx context.Context, in *TestRequest, opts ...grpc.CallOption) (Test_RunClient, error) {
-	stream, err := grpc.NewClientStream(ctx, &_Test_serviceDesc.Streams[0], c.cc, "/control.Test/Run", opts...)
+	stream, err := grpc.NewClientStream(ctx, &_Test_serviceDesc.Streams[0], c.cc, "/floodchrome.Test/Run", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -323,7 +422,7 @@ func (x *testRunServer) Send(m *TestResult) error {
 }
 
 var _Test_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "control.Test",
+	ServiceName: "floodchrome.Test",
 	HandlerType: (*TestServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
@@ -387,6 +486,12 @@ func (m *TestResult) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Message) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Message)))
+		i += copy(dAtA[i:], m.Message)
+	}
 	if m.Result != nil {
 		nn1, err := m.Result.MarshalTo(dAtA[i:])
 		if err != nil {
@@ -397,13 +502,13 @@ func (m *TestResult) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *TestResult_Error) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Log) MarshalTo(dAtA []byte) (int, error) {
 	i := 0
-	if m.Error != nil {
-		dAtA[i] = 0xa
+	if m.Log != nil {
+		dAtA[i] = 0x12
 		i++
-		i = encodeVarintControl(dAtA, i, uint64(m.Error.Size()))
-		n2, err := m.Error.MarshalTo(dAtA[i:])
+		i = encodeVarintControl(dAtA, i, uint64(m.Log.Size()))
+		n2, err := m.Log.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
@@ -411,13 +516,13 @@ func (m *TestResult_Error) MarshalTo(dAtA []byte) (int, error) {
 	}
 	return i, nil
 }
-func (m *TestResult_StepResult) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Error) MarshalTo(dAtA []byte) (int, error) {
 	i := 0
-	if m.StepResult != nil {
-		dAtA[i] = 0x12
+	if m.Error != nil {
+		dAtA[i] = 0x1a
 		i++
-		i = encodeVarintControl(dAtA, i, uint64(m.StepResult.Size()))
-		n3, err := m.StepResult.MarshalTo(dAtA[i:])
+		i = encodeVarintControl(dAtA, i, uint64(m.Error.Size()))
+		n3, err := m.Error.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
@@ -425,7 +530,35 @@ func (m *TestResult_StepResult) MarshalTo(dAtA []byte) (int, error) {
 	}
 	return i, nil
 }
-func (m *TestParseError) Marshal() (dAtA []byte, err error) {
+func (m *TestResult_Step) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.Step != nil {
+		dAtA[i] = 0x22
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(m.Step.Size()))
+		n4, err := m.Step.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n4
+	}
+	return i, nil
+}
+func (m *TestResult_Complete) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.Complete != nil {
+		dAtA[i] = 0x2a
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(m.Complete.Size()))
+		n5, err := m.Complete.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n5
+	}
+	return i, nil
+}
+func (m *TestResultLog) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -435,19 +568,61 @@ func (m *TestParseError) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TestParseError) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResultLog) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
 	_ = l
-	if len(m.Message) > 0 {
+	if len(m.Level) > 0 {
 		dAtA[i] = 0xa
 		i++
-		i = encodeVarintControl(dAtA, i, uint64(len(m.Message)))
-		i += copy(dAtA[i:], m.Message)
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Level)))
+		i += copy(dAtA[i:], m.Level)
 	}
+	return i, nil
+}
+
+func (m *TestResultError) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TestResultError) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Stack) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Stack)))
+		i += copy(dAtA[i:], m.Stack)
+	}
+	return i, nil
+}
+
+func (m *TestResultStep) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TestResultStep) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
 	if len(m.Detail) > 0 {
-		dAtA[i] = 0x12
+		dAtA[i] = 0xa
 		i++
 		i = encodeVarintControl(dAtA, i, uint64(len(m.Detail)))
 		i += copy(dAtA[i:], m.Detail)
@@ -455,7 +630,7 @@ func (m *TestParseError) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *TestStepResult) Marshal() (dAtA []byte, err error) {
+func (m *TestResultComplete) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -465,16 +640,16 @@ func (m *TestStepResult) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TestStepResult) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResultComplete) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
 	_ = l
-	if len(m.Message) > 0 {
+	if len(m.Detail) > 0 {
 		dAtA[i] = 0xa
 		i++
-		i = encodeVarintControl(dAtA, i, uint64(len(m.Message)))
-		i += copy(dAtA[i:], m.Message)
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Detail)))
+		i += copy(dAtA[i:], m.Detail)
 	}
 	return i, nil
 }
@@ -509,12 +684,25 @@ func (m *TestRequest) Size() (n int) {
 func (m *TestResult) Size() (n int) {
 	var l int
 	_ = l
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
 	if m.Result != nil {
 		n += m.Result.Size()
 	}
 	return n
 }
 
+func (m *TestResult_Log) Size() (n int) {
+	var l int
+	_ = l
+	if m.Log != nil {
+		l = m.Log.Size()
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
 func (m *TestResult_Error) Size() (n int) {
 	var l int
 	_ = l
@@ -524,22 +712,47 @@ func (m *TestResult_Error) Size() (n int) {
 	}
 	return n
 }
-func (m *TestResult_StepResult) Size() (n int) {
+func (m *TestResult_Step) Size() (n int) {
 	var l int
 	_ = l
-	if m.StepResult != nil {
-		l = m.StepResult.Size()
+	if m.Step != nil {
+		l = m.Step.Size()
 		n += 1 + l + sovControl(uint64(l))
 	}
 	return n
 }
-func (m *TestParseError) Size() (n int) {
+func (m *TestResult_Complete) Size() (n int) {
 	var l int
 	_ = l
-	l = len(m.Message)
+	if m.Complete != nil {
+		l = m.Complete.Size()
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+func (m *TestResultLog) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Level)
 	if l > 0 {
 		n += 1 + l + sovControl(uint64(l))
 	}
+	return n
+}
+
+func (m *TestResultError) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Stack)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+
+func (m *TestResultStep) Size() (n int) {
+	var l int
+	_ = l
 	l = len(m.Detail)
 	if l > 0 {
 		n += 1 + l + sovControl(uint64(l))
@@ -547,10 +760,10 @@ func (m *TestParseError) Size() (n int) {
 	return n
 }
 
-func (m *TestStepResult) Size() (n int) {
+func (m *TestResultComplete) Size() (n int) {
 	var l int
 	_ = l
-	l = len(m.Message)
+	l = len(m.Detail)
 	if l > 0 {
 		n += 1 + l + sovControl(uint64(l))
 	}
@@ -661,7 +874,7 @@ func (m *TestRequest) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Script", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowControl
@@ -671,22 +884,20 @@ func (m *TestRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= (int(b) & 0x7F) << shift
+				stringLen |= (uint64(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthControl
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Script = append(m.Script[:0], dAtA[iNdEx:postIndex]...)
-			if m.Script == nil {
-				m.Script = []byte{}
-			}
+			m.Script = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -740,6 +951,67 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Log", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TestResultLog{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Result = &TestResult_Log{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Error", wireType)
 			}
 			var msglen int
@@ -764,15 +1036,15 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &TestParseError{}
+			v := &TestResultError{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			m.Result = &TestResult_Error{v}
 			iNdEx = postIndex
-		case 2:
+		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StepResult", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Step", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -796,11 +1068,43 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &TestStepResult{}
+			v := &TestResultStep{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Result = &TestResult_StepResult{v}
+			m.Result = &TestResult_Step{v}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Complete", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TestResultComplete{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Result = &TestResult_Complete{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -823,7 +1127,7 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TestParseError) Unmarshal(dAtA []byte) error {
+func (m *TestResultLog) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -846,15 +1150,15 @@ func (m *TestParseError) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TestParseError: wiretype end group for non-group")
+			return fmt.Errorf("proto: TestResultLog: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TestParseError: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: TestResultLog: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Level", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -879,13 +1183,142 @@ func (m *TestParseError) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Message = string(dAtA[iNdEx:postIndex])
+			m.Level = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		default:
+			iNdEx = preIndex
+			skippy, err := skipControl(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthControl
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TestResultError) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowControl
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TestResultError: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TestResultError: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Stack", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Stack = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipControl(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthControl
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TestResultStep) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowControl
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TestResultStep: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TestResultStep: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Detail", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowControl
@@ -895,22 +1328,20 @@ func (m *TestParseError) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= (int(b) & 0x7F) << shift
+				stringLen |= (uint64(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthControl
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Detail = append(m.Detail[:0], dAtA[iNdEx:postIndex]...)
-			if m.Detail == nil {
-				m.Detail = []byte{}
-			}
+			m.Detail = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -933,7 +1364,7 @@ func (m *TestParseError) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TestStepResult) Unmarshal(dAtA []byte) error {
+func (m *TestResultComplete) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -956,15 +1387,15 @@ func (m *TestStepResult) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TestStepResult: wiretype end group for non-group")
+			return fmt.Errorf("proto: TestResultComplete: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TestStepResult: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: TestResultComplete: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Detail", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -989,7 +1420,7 @@ func (m *TestStepResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Message = string(dAtA[iNdEx:postIndex])
+			m.Detail = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -1120,23 +1551,28 @@ var (
 func init() { proto.RegisterFile("control.proto", fileDescriptorControl) }
 
 var fileDescriptorControl = []byte{
-	// 283 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0xc1, 0x4a, 0xc3, 0x40,
-	0x10, 0x86, 0xb3, 0xb6, 0xa6, 0x75, 0x52, 0x45, 0x46, 0xd1, 0xd0, 0x43, 0x28, 0x39, 0x15, 0x0f,
-	0x55, 0xe2, 0xad, 0xc7, 0xa0, 0x50, 0x6f, 0xb2, 0xea, 0x59, 0x62, 0x3a, 0x48, 0x20, 0x26, 0x71,
-	0x77, 0xf2, 0x04, 0xbe, 0x84, 0x8f, 0xe4, 0xd1, 0x47, 0x90, 0xf8, 0x22, 0x92, 0xcd, 0xb6, 0xd2,
-	0x42, 0x6f, 0xfb, 0xcf, 0xce, 0xff, 0xfd, 0x33, 0xbb, 0x70, 0x98, 0x96, 0x05, 0xab, 0x32, 0x9f,
-	0x55, 0xaa, 0xe4, 0x12, 0x07, 0x56, 0x86, 0x4f, 0xe0, 0x3d, 0x92, 0x66, 0x49, 0xef, 0x35, 0x69,
-	0xc6, 0x31, 0x0c, 0xd3, 0x3c, 0xa3, 0x82, 0xef, 0x6e, 0x7c, 0x31, 0x11, 0xd3, 0x03, 0xb9, 0xd6,
-	0x88, 0xd0, 0xaf, 0xeb, 0x6c, 0xe9, 0xef, 0x99, 0xba, 0x39, 0xe3, 0x19, 0xb8, 0x3a, 0x55, 0x59,
-	0xc5, 0x7e, 0x6f, 0x22, 0xa6, 0x23, 0x69, 0x55, 0xf8, 0x21, 0x00, 0x3a, 0xae, 0xae, 0x73, 0xc6,
-	0x4b, 0xd8, 0x27, 0xa5, 0x4a, 0x65, 0x98, 0x5e, 0x74, 0x3e, 0x5b, 0x4d, 0xd3, 0xf6, 0xdc, 0x27,
-	0x4a, 0xd3, 0x6d, 0x7b, 0xbd, 0x70, 0x64, 0xd7, 0x87, 0x73, 0xf0, 0x34, 0x53, 0xf5, 0xac, 0x8c,
-	0xdf, 0x44, 0x6e, 0xdb, 0x1e, 0x98, 0xaa, 0x0e, 0xbf, 0x70, 0x24, 0xe8, 0xb5, 0x8a, 0x87, 0xe0,
-	0x76, 0xb6, 0x30, 0x86, 0xa3, 0xcd, 0x00, 0xf4, 0x61, 0xf0, 0x46, 0x5a, 0x27, 0xaf, 0x64, 0xd7,
-	0x5b, 0xc9, 0x76, 0x93, 0x25, 0x71, 0x92, 0xe5, 0x26, 0x6c, 0x24, 0xad, 0x0a, 0x2f, 0x3a, 0xc6,
-	0x7f, 0xda, 0x6e, 0x46, 0x34, 0x87, 0x7e, 0xdb, 0x8b, 0x11, 0xf4, 0x64, 0x5d, 0xe0, 0xe9, 0xc6,
-	0xbc, 0xf6, 0x89, 0xc7, 0x27, 0x5b, 0xd5, 0x96, 0x79, 0x25, 0xe2, 0xe3, 0xaf, 0x26, 0x10, 0xdf,
-	0x4d, 0x20, 0x7e, 0x9a, 0x40, 0x7c, 0xfe, 0x06, 0xce, 0x8b, 0x6b, 0xbe, 0xea, 0xfa, 0x2f, 0x00,
-	0x00, 0xff, 0xff, 0xee, 0xdb, 0x02, 0xf0, 0xbb, 0x01, 0x00, 0x00,
+	// 354 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0x41, 0x4e, 0xe3, 0x30,
+	0x14, 0x86, 0x93, 0x36, 0xed, 0x74, 0x5e, 0xd4, 0x99, 0xd1, 0xd3, 0x08, 0xac, 0x82, 0x02, 0x8a,
+	0x84, 0xe8, 0x02, 0x45, 0x50, 0x58, 0x21, 0xb1, 0x29, 0x20, 0x05, 0x89, 0x95, 0x81, 0x03, 0x94,
+	0xf4, 0x51, 0x22, 0xdc, 0x3a, 0xd8, 0x0e, 0x67, 0xe0, 0x08, 0x1c, 0x89, 0x25, 0x47, 0x40, 0xe5,
+	0x22, 0x28, 0x6e, 0x5a, 0x28, 0x90, 0x5d, 0x7e, 0xe7, 0xfb, 0xff, 0xfc, 0x7e, 0x79, 0xd0, 0x4e,
+	0xe4, 0xc4, 0x28, 0x29, 0xa2, 0x4c, 0x49, 0x23, 0xd1, 0xbf, 0x11, 0x52, 0x0e, 0x93, 0x5b, 0x25,
+	0xc7, 0x14, 0x5e, 0x81, 0x7f, 0x49, 0xda, 0x70, 0xba, 0xcf, 0x49, 0x1b, 0xec, 0x40, 0x2b, 0x11,
+	0x29, 0x4d, 0xcc, 0xd9, 0x09, 0x73, 0x37, 0xdd, 0xee, 0x6f, 0xbe, 0xd0, 0x88, 0xe0, 0xe5, 0x79,
+	0x3a, 0x64, 0x35, 0x7b, 0x6e, 0x9f, 0x71, 0x05, 0x9a, 0x3a, 0x51, 0x69, 0x66, 0x58, 0xdd, 0x9e,
+	0x96, 0x2a, 0x7c, 0xac, 0x01, 0xcc, 0x72, 0x75, 0x2e, 0x0c, 0x32, 0xf8, 0x35, 0x26, 0xad, 0x07,
+	0x23, 0x2a, 0x53, 0xe7, 0x12, 0x23, 0xa8, 0x0b, 0x39, 0xb2, 0x99, 0x7e, 0xaf, 0x13, 0x7d, 0xaa,
+	0x16, 0x7d, 0xf8, 0xcf, 0xe5, 0x28, 0x76, 0x78, 0x01, 0xe2, 0x01, 0x34, 0x48, 0x29, 0xa9, 0xec,
+	0xf7, 0xfc, 0xde, 0x7a, 0x85, 0xe3, 0xb4, 0x60, 0x62, 0x87, 0xcf, 0x60, 0xdc, 0x03, 0x4f, 0x1b,
+	0xca, 0x98, 0x67, 0x4d, 0x6b, 0x15, 0xa6, 0x0b, 0x43, 0x59, 0xec, 0x70, 0x8b, 0xe2, 0x11, 0xb4,
+	0x12, 0x39, 0xce, 0x04, 0x19, 0x62, 0x0d, 0x6b, 0xdb, 0xa8, 0xb0, 0x1d, 0x97, 0x58, 0xec, 0xf0,
+	0x85, 0xa5, 0xdf, 0x82, 0xa6, 0xb2, 0x6f, 0xc3, 0x2d, 0x68, 0x2f, 0xdd, 0x04, 0xff, 0x43, 0x43,
+	0xd0, 0x03, 0x89, 0x72, 0x14, 0x33, 0x11, 0x6e, 0xc3, 0xdf, 0x2f, 0xf5, 0x0b, 0x50, 0x9b, 0x41,
+	0x72, 0x37, 0x07, 0xad, 0x08, 0xbb, 0xf0, 0x67, 0xb9, 0x72, 0xf1, 0x13, 0x86, 0x64, 0x06, 0xe9,
+	0x3c, 0xb1, 0x54, 0xe1, 0x0e, 0xe0, 0xf7, 0x96, 0x55, 0x74, 0xaf, 0x0f, 0x5e, 0x41, 0xe3, 0x21,
+	0xd4, 0x79, 0x3e, 0x41, 0xf6, 0xc3, 0x6d, 0xed, 0x8e, 0x74, 0x56, 0x2b, 0xe6, 0xb0, 0xeb, 0xf6,
+	0xff, 0x3d, 0x4f, 0x03, 0xf7, 0x65, 0x1a, 0xb8, 0xaf, 0xd3, 0xc0, 0x7d, 0x7a, 0x0b, 0x9c, 0xeb,
+	0xa6, 0xdd, 0xb9, 0xfd, 0xf7, 0x00, 0x00, 0x00, 0xff, 0xff, 0xbf, 0xf7, 0x15, 0xeb, 0x84, 0x02,
+	0x00, 0x00,
 }
