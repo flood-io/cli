@@ -1,5 +1,5 @@
-hash: d65e2d451e6f62228e9f6c3db775347e9e72b71011e05fd6364061bb07fa996a
-updated: 2017-09-15T15:58:12.119667516+10:00
+hash: f3d54381c93595d42143b3e81bab1380bedceb0e59c78c24142ba14bb53414aa
+updated: 2018-01-09T12:52:28.282823856+11:00
 imports:
 - name: github.com/google/go-querystring
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
@@ -7,6 +7,8 @@ imports:
   - query
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/spf13/cobra
   version: b78744579491c1ceeaaa3b40205e56b0591b93a3
 - name: github.com/spf13/pflag

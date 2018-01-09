@@ -1,2 +1,4 @@
 package: github.com/flood-io/cli
-import: []
+import:
+- package: github.com/pkg/errors
+  version: ^0.8.0
