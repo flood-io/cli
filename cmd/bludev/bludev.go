@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	pb "github.com/flood-io/cli/proto"
 	"google.golang.org/grpc"
@@ -70,27 +71,61 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.Run(_) = _, %v", client, err)
+			log.Fatalf("stream %v.Run(_) = _, %v", client, err)
 		}
 
 		// fmt.Printf("result = %+v\n", result)
 		// fmt.Printf("result = %T\n", result)
 		// fmt.Println("result", result.String())
 
-		fmt.Println(result.Message)
-		// if logM := result.GetLog(); logM != nil {
-		// } else if errM := result.GetError(); errM != nil {
-		// fmt.Println(errM.Message)
-		// fmt.Println("stack:", errM.Stack)
-		// } else if completeM := result.GetComplete(); completeM != nil {
-		// fmt.Println("done:", completeM.Message)
-		// break
-		// } else {
-		// fmt.Println("result", result.String())
+		// dispatch
+		if logM := result.GetLog(); logM != nil {
+			fmt.Printf("[%5s] %+v\n", logM.Level, result.Message)
+		} else if measurementM := result.GetMeasurement(); measurementM != nil {
+			fmt.Printf("[meas ] %s - %s - %v\n", result.Message, measurementM.Measurement, measurementM.Value)
+		} else if traceM := result.GetTrace(); traceM != nil {
+			fmt.Printf("[trace] %s - %s\n", result.Message, traceM.ResponseCode)
+			fmt.Printf("traceM.String() = %+v\n", traceM.String())
+			if networkT := traceM.GetNetwork(); networkT != nil {
+				err = writeNetworkTrace(networkT)
+				if err != nil {
+					return err
+				}
+			}
+
+		} else {
+			fmt.Println(result.Message)
+			fmt.Println(result.String())
+		}
+
+		// if traceM := result.GetTrace(); traceM != nil {
+		// fmt.Printf("traceM.TraceDataJSON = %+v\n", traceM.TraceDataJSON)
 		// }
+
 		if completeM := result.GetComplete(); completeM != nil {
 			break
 		}
+	}
+
+	return
+}
+
+func writeNetworkTrace(t *pb.TestResult_Trace_Network) (err error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	har := filepath.Join(cwd, "har.json")
+	fmt.Println("writing network trace", har)
+
+	f, err := os.Create(har)
+	if err != nil {
+		return
+	}
+
+	_, err = f.WriteString(t.Har)
+	if err != nil {
+		return
 	}
 
 	return

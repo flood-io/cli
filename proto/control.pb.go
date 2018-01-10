@@ -10,21 +10,22 @@
 	It has these top-level messages:
 		TestRequest
 		TestResult
-		TestResultLog
-		TestResultError
-		TestResultStep
-		TestResultComplete
 */
 package floodchrome
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	"fmt"
 
-import context "golang.org/x/net/context"
-import grpc "google.golang.org/grpc"
+	proto "github.com/golang/protobuf/proto"
 
-import io "io"
+	math "math"
+
+	context "golang.org/x/net/context"
+
+	grpc "google.golang.org/grpc"
+
+	io "io"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -72,10 +73,12 @@ func (m *TestRequest) GetScript() string {
 type TestResult struct {
 	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	// Types that are valid to be assigned to Result:
-	//	*TestResult_Log
-	//	*TestResult_Error
-	//	*TestResult_Step
-	//	*TestResult_Complete
+	//	*TestResult_Log_
+	//	*TestResult_Error_
+	//	*TestResult_Step_
+	//	*TestResult_Complete_
+	//	*TestResult_Measurement_
+	//	*TestResult_Trace_
 	Result isTestResult_Result `protobuf_oneof:"result"`
 }
 
@@ -90,23 +93,31 @@ type isTestResult_Result interface {
 	Size() int
 }
 
-type TestResult_Log struct {
-	Log *TestResultLog `protobuf:"bytes,2,opt,name=log,oneof"`
+type TestResult_Log_ struct {
+	Log *TestResult_Log `protobuf:"bytes,2,opt,name=log,oneof"`
 }
-type TestResult_Error struct {
-	Error *TestResultError `protobuf:"bytes,3,opt,name=error,oneof"`
+type TestResult_Error_ struct {
+	Error *TestResult_Error `protobuf:"bytes,3,opt,name=error,oneof"`
 }
-type TestResult_Step struct {
-	Step *TestResultStep `protobuf:"bytes,4,opt,name=step,oneof"`
+type TestResult_Step_ struct {
+	Step *TestResult_Step `protobuf:"bytes,4,opt,name=step,oneof"`
 }
-type TestResult_Complete struct {
-	Complete *TestResultComplete `protobuf:"bytes,5,opt,name=complete,oneof"`
+type TestResult_Complete_ struct {
+	Complete *TestResult_Complete `protobuf:"bytes,5,opt,name=complete,oneof"`
+}
+type TestResult_Measurement_ struct {
+	Measurement *TestResult_Measurement `protobuf:"bytes,6,opt,name=measurement,oneof"`
+}
+type TestResult_Trace_ struct {
+	Trace *TestResult_Trace `protobuf:"bytes,7,opt,name=trace,oneof"`
 }
 
-func (*TestResult_Log) isTestResult_Result()      {}
-func (*TestResult_Error) isTestResult_Result()    {}
-func (*TestResult_Step) isTestResult_Result()     {}
-func (*TestResult_Complete) isTestResult_Result() {}
+func (*TestResult_Log_) isTestResult_Result()         {}
+func (*TestResult_Error_) isTestResult_Result()       {}
+func (*TestResult_Step_) isTestResult_Result()        {}
+func (*TestResult_Complete_) isTestResult_Result()    {}
+func (*TestResult_Measurement_) isTestResult_Result() {}
+func (*TestResult_Trace_) isTestResult_Result()       {}
 
 func (m *TestResult) GetResult() isTestResult_Result {
 	if m != nil {
@@ -122,30 +133,44 @@ func (m *TestResult) GetMessage() string {
 	return ""
 }
 
-func (m *TestResult) GetLog() *TestResultLog {
-	if x, ok := m.GetResult().(*TestResult_Log); ok {
+func (m *TestResult) GetLog() *TestResult_Log {
+	if x, ok := m.GetResult().(*TestResult_Log_); ok {
 		return x.Log
 	}
 	return nil
 }
 
-func (m *TestResult) GetError() *TestResultError {
-	if x, ok := m.GetResult().(*TestResult_Error); ok {
+func (m *TestResult) GetError() *TestResult_Error {
+	if x, ok := m.GetResult().(*TestResult_Error_); ok {
 		return x.Error
 	}
 	return nil
 }
 
-func (m *TestResult) GetStep() *TestResultStep {
-	if x, ok := m.GetResult().(*TestResult_Step); ok {
+func (m *TestResult) GetStep() *TestResult_Step {
+	if x, ok := m.GetResult().(*TestResult_Step_); ok {
 		return x.Step
 	}
 	return nil
 }
 
-func (m *TestResult) GetComplete() *TestResultComplete {
-	if x, ok := m.GetResult().(*TestResult_Complete); ok {
+func (m *TestResult) GetComplete() *TestResult_Complete {
+	if x, ok := m.GetResult().(*TestResult_Complete_); ok {
 		return x.Complete
+	}
+	return nil
+}
+
+func (m *TestResult) GetMeasurement() *TestResult_Measurement {
+	if x, ok := m.GetResult().(*TestResult_Measurement_); ok {
+		return x.Measurement
+	}
+	return nil
+}
+
+func (m *TestResult) GetTrace() *TestResult_Trace {
+	if x, ok := m.GetResult().(*TestResult_Trace_); ok {
+		return x.Trace
 	}
 	return nil
 }
@@ -153,10 +178,12 @@ func (m *TestResult) GetComplete() *TestResultComplete {
 // XXX_OneofFuncs is for the internal use of the proto package.
 func (*TestResult) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
 	return _TestResult_OneofMarshaler, _TestResult_OneofUnmarshaler, _TestResult_OneofSizer, []interface{}{
-		(*TestResult_Log)(nil),
-		(*TestResult_Error)(nil),
-		(*TestResult_Step)(nil),
-		(*TestResult_Complete)(nil),
+		(*TestResult_Log_)(nil),
+		(*TestResult_Error_)(nil),
+		(*TestResult_Step_)(nil),
+		(*TestResult_Complete_)(nil),
+		(*TestResult_Measurement_)(nil),
+		(*TestResult_Trace_)(nil),
 	}
 }
 
@@ -164,24 +191,34 @@ func _TestResult_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 	m := msg.(*TestResult)
 	// result
 	switch x := m.Result.(type) {
-	case *TestResult_Log:
+	case *TestResult_Log_:
 		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.Log); err != nil {
 			return err
 		}
-	case *TestResult_Error:
+	case *TestResult_Error_:
 		_ = b.EncodeVarint(3<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.Error); err != nil {
 			return err
 		}
-	case *TestResult_Step:
+	case *TestResult_Step_:
 		_ = b.EncodeVarint(4<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.Step); err != nil {
 			return err
 		}
-	case *TestResult_Complete:
+	case *TestResult_Complete_:
 		_ = b.EncodeVarint(5<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.Complete); err != nil {
+			return err
+		}
+	case *TestResult_Measurement_:
+		_ = b.EncodeVarint(6<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Measurement); err != nil {
+			return err
+		}
+	case *TestResult_Trace_:
+		_ = b.EncodeVarint(7<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Trace); err != nil {
 			return err
 		}
 	case nil:
@@ -198,33 +235,49 @@ func _TestResult_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buf
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(TestResultLog)
+		msg := new(TestResult_Log)
 		err := b.DecodeMessage(msg)
-		m.Result = &TestResult_Log{msg}
+		m.Result = &TestResult_Log_{msg}
 		return true, err
 	case 3: // result.error
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(TestResultError)
+		msg := new(TestResult_Error)
 		err := b.DecodeMessage(msg)
-		m.Result = &TestResult_Error{msg}
+		m.Result = &TestResult_Error_{msg}
 		return true, err
 	case 4: // result.step
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(TestResultStep)
+		msg := new(TestResult_Step)
 		err := b.DecodeMessage(msg)
-		m.Result = &TestResult_Step{msg}
+		m.Result = &TestResult_Step_{msg}
 		return true, err
 	case 5: // result.complete
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(TestResultComplete)
+		msg := new(TestResult_Complete)
 		err := b.DecodeMessage(msg)
-		m.Result = &TestResult_Complete{msg}
+		m.Result = &TestResult_Complete_{msg}
+		return true, err
+	case 6: // result.measurement
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(TestResult_Measurement)
+		err := b.DecodeMessage(msg)
+		m.Result = &TestResult_Measurement_{msg}
+		return true, err
+	case 7: // result.trace
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(TestResult_Trace)
+		err := b.DecodeMessage(msg)
+		m.Result = &TestResult_Trace_{msg}
 		return true, err
 	default:
 		return false, nil
@@ -235,24 +288,34 @@ func _TestResult_OneofSizer(msg proto.Message) (n int) {
 	m := msg.(*TestResult)
 	// result
 	switch x := m.Result.(type) {
-	case *TestResult_Log:
+	case *TestResult_Log_:
 		s := proto.Size(x.Log)
 		n += proto.SizeVarint(2<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *TestResult_Error:
+	case *TestResult_Error_:
 		s := proto.Size(x.Error)
 		n += proto.SizeVarint(3<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *TestResult_Step:
+	case *TestResult_Step_:
 		s := proto.Size(x.Step)
 		n += proto.SizeVarint(4<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *TestResult_Complete:
+	case *TestResult_Complete_:
 		s := proto.Size(x.Complete)
 		n += proto.SizeVarint(5<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *TestResult_Measurement_:
+		s := proto.Size(x.Measurement)
+		n += proto.SizeVarint(6<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *TestResult_Trace_:
+		s := proto.Size(x.Trace)
+		n += proto.SizeVarint(7<<3 | proto.WireBytes)
 		n += proto.SizeVarint(uint64(s))
 		n += s
 	case nil:
@@ -262,78 +325,297 @@ func _TestResult_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
-type TestResultLog struct {
+type TestResult_Log struct {
 	Level string `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
 }
 
-func (m *TestResultLog) Reset()                    { *m = TestResultLog{} }
-func (m *TestResultLog) String() string            { return proto.CompactTextString(m) }
-func (*TestResultLog) ProtoMessage()               {}
-func (*TestResultLog) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{2} }
+func (m *TestResult_Log) Reset()                    { *m = TestResult_Log{} }
+func (m *TestResult_Log) String() string            { return proto.CompactTextString(m) }
+func (*TestResult_Log) ProtoMessage()               {}
+func (*TestResult_Log) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{1, 0} }
 
-func (m *TestResultLog) GetLevel() string {
+func (m *TestResult_Log) GetLevel() string {
 	if m != nil {
 		return m.Level
 	}
 	return ""
 }
 
-type TestResultError struct {
+type TestResult_Error struct {
 	// bytes detail = 2;
 	Stack string `protobuf:"bytes,1,opt,name=stack,proto3" json:"stack,omitempty"`
 }
 
-func (m *TestResultError) Reset()                    { *m = TestResultError{} }
-func (m *TestResultError) String() string            { return proto.CompactTextString(m) }
-func (*TestResultError) ProtoMessage()               {}
-func (*TestResultError) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{3} }
+func (m *TestResult_Error) Reset()                    { *m = TestResult_Error{} }
+func (m *TestResult_Error) String() string            { return proto.CompactTextString(m) }
+func (*TestResult_Error) ProtoMessage()               {}
+func (*TestResult_Error) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{1, 1} }
 
-func (m *TestResultError) GetStack() string {
+func (m *TestResult_Error) GetStack() string {
 	if m != nil {
 		return m.Stack
 	}
 	return ""
 }
 
-type TestResultStep struct {
+type TestResult_Step struct {
 	Detail string `protobuf:"bytes,1,opt,name=detail,proto3" json:"detail,omitempty"`
 }
 
-func (m *TestResultStep) Reset()                    { *m = TestResultStep{} }
-func (m *TestResultStep) String() string            { return proto.CompactTextString(m) }
-func (*TestResultStep) ProtoMessage()               {}
-func (*TestResultStep) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{4} }
+func (m *TestResult_Step) Reset()                    { *m = TestResult_Step{} }
+func (m *TestResult_Step) String() string            { return proto.CompactTextString(m) }
+func (*TestResult_Step) ProtoMessage()               {}
+func (*TestResult_Step) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{1, 2} }
 
-func (m *TestResultStep) GetDetail() string {
+func (m *TestResult_Step) GetDetail() string {
 	if m != nil {
 		return m.Detail
 	}
 	return ""
 }
 
-type TestResultComplete struct {
+type TestResult_Complete struct {
 	Detail string `protobuf:"bytes,1,opt,name=detail,proto3" json:"detail,omitempty"`
 }
 
-func (m *TestResultComplete) Reset()                    { *m = TestResultComplete{} }
-func (m *TestResultComplete) String() string            { return proto.CompactTextString(m) }
-func (*TestResultComplete) ProtoMessage()               {}
-func (*TestResultComplete) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{5} }
+func (m *TestResult_Complete) Reset()                    { *m = TestResult_Complete{} }
+func (m *TestResult_Complete) String() string            { return proto.CompactTextString(m) }
+func (*TestResult_Complete) ProtoMessage()               {}
+func (*TestResult_Complete) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{1, 3} }
 
-func (m *TestResultComplete) GetDetail() string {
+func (m *TestResult_Complete) GetDetail() string {
 	if m != nil {
 		return m.Detail
 	}
 	return ""
+}
+
+type TestResult_Measurement struct {
+	Measurement  string `protobuf:"bytes,1,opt,name=measurement,proto3" json:"measurement,omitempty"`
+	Value        string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Label        string `protobuf:"bytes,3,opt,name=label,proto3" json:"label,omitempty"`
+	ResponseCode string `protobuf:"bytes,4,opt,name=responseCode,proto3" json:"responseCode,omitempty"`
+}
+
+func (m *TestResult_Measurement) Reset()                    { *m = TestResult_Measurement{} }
+func (m *TestResult_Measurement) String() string            { return proto.CompactTextString(m) }
+func (*TestResult_Measurement) ProtoMessage()               {}
+func (*TestResult_Measurement) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{1, 4} }
+
+func (m *TestResult_Measurement) GetMeasurement() string {
+	if m != nil {
+		return m.Measurement
+	}
+	return ""
+}
+
+func (m *TestResult_Measurement) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+func (m *TestResult_Measurement) GetLabel() string {
+	if m != nil {
+		return m.Label
+	}
+	return ""
+}
+
+func (m *TestResult_Measurement) GetResponseCode() string {
+	if m != nil {
+		return m.ResponseCode
+	}
+	return ""
+}
+
+type TestResult_Trace struct {
+	Label        string `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	ResponseCode string `protobuf:"bytes,2,opt,name=responseCode,proto3" json:"responseCode,omitempty"`
+	// Types that are valid to be assigned to Data:
+	//	*TestResult_Trace_Network_
+	//	*TestResult_Trace_Screenshot_
+	Data isTestResult_Trace_Data `protobuf_oneof:"data"`
+}
+
+func (m *TestResult_Trace) Reset()                    { *m = TestResult_Trace{} }
+func (m *TestResult_Trace) String() string            { return proto.CompactTextString(m) }
+func (*TestResult_Trace) ProtoMessage()               {}
+func (*TestResult_Trace) Descriptor() ([]byte, []int) { return fileDescriptorControl, []int{1, 5} }
+
+type isTestResult_Trace_Data interface {
+	isTestResult_Trace_Data()
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type TestResult_Trace_Network_ struct {
+	Network *TestResult_Trace_Network `protobuf:"bytes,3,opt,name=network,oneof"`
+}
+type TestResult_Trace_Screenshot_ struct {
+	Screenshot *TestResult_Trace_Screenshot `protobuf:"bytes,4,opt,name=screenshot,oneof"`
+}
+
+func (*TestResult_Trace_Network_) isTestResult_Trace_Data()    {}
+func (*TestResult_Trace_Screenshot_) isTestResult_Trace_Data() {}
+
+func (m *TestResult_Trace) GetData() isTestResult_Trace_Data {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+func (m *TestResult_Trace) GetLabel() string {
+	if m != nil {
+		return m.Label
+	}
+	return ""
+}
+
+func (m *TestResult_Trace) GetResponseCode() string {
+	if m != nil {
+		return m.ResponseCode
+	}
+	return ""
+}
+
+func (m *TestResult_Trace) GetNetwork() *TestResult_Trace_Network {
+	if x, ok := m.GetData().(*TestResult_Trace_Network_); ok {
+		return x.Network
+	}
+	return nil
+}
+
+func (m *TestResult_Trace) GetScreenshot() *TestResult_Trace_Screenshot {
+	if x, ok := m.GetData().(*TestResult_Trace_Screenshot_); ok {
+		return x.Screenshot
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*TestResult_Trace) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _TestResult_Trace_OneofMarshaler, _TestResult_Trace_OneofUnmarshaler, _TestResult_Trace_OneofSizer, []interface{}{
+		(*TestResult_Trace_Network_)(nil),
+		(*TestResult_Trace_Screenshot_)(nil),
+	}
+}
+
+func _TestResult_Trace_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*TestResult_Trace)
+	// data
+	switch x := m.Data.(type) {
+	case *TestResult_Trace_Network_:
+		_ = b.EncodeVarint(3<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Network); err != nil {
+			return err
+		}
+	case *TestResult_Trace_Screenshot_:
+		_ = b.EncodeVarint(4<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Screenshot); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("TestResult_Trace.Data has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _TestResult_Trace_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*TestResult_Trace)
+	switch tag {
+	case 3: // data.network
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(TestResult_Trace_Network)
+		err := b.DecodeMessage(msg)
+		m.Data = &TestResult_Trace_Network_{msg}
+		return true, err
+	case 4: // data.screenshot
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(TestResult_Trace_Screenshot)
+		err := b.DecodeMessage(msg)
+		m.Data = &TestResult_Trace_Screenshot_{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _TestResult_Trace_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*TestResult_Trace)
+	// data
+	switch x := m.Data.(type) {
+	case *TestResult_Trace_Network_:
+		s := proto.Size(x.Network)
+		n += proto.SizeVarint(3<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *TestResult_Trace_Screenshot_:
+		s := proto.Size(x.Screenshot)
+		n += proto.SizeVarint(4<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+type TestResult_Trace_Network struct {
+	Har string `protobuf:"bytes,1,opt,name=har,proto3" json:"har,omitempty"`
+}
+
+func (m *TestResult_Trace_Network) Reset()         { *m = TestResult_Trace_Network{} }
+func (m *TestResult_Trace_Network) String() string { return proto.CompactTextString(m) }
+func (*TestResult_Trace_Network) ProtoMessage()    {}
+func (*TestResult_Trace_Network) Descriptor() ([]byte, []int) {
+	return fileDescriptorControl, []int{1, 5, 0}
+}
+
+func (m *TestResult_Trace_Network) GetHar() string {
+	if m != nil {
+		return m.Har
+	}
+	return ""
+}
+
+type TestResult_Trace_Screenshot struct {
+	Image []string `protobuf:"bytes,1,rep,name=image" json:"image,omitempty"`
+}
+
+func (m *TestResult_Trace_Screenshot) Reset()         { *m = TestResult_Trace_Screenshot{} }
+func (m *TestResult_Trace_Screenshot) String() string { return proto.CompactTextString(m) }
+func (*TestResult_Trace_Screenshot) ProtoMessage()    {}
+func (*TestResult_Trace_Screenshot) Descriptor() ([]byte, []int) {
+	return fileDescriptorControl, []int{1, 5, 1}
+}
+
+func (m *TestResult_Trace_Screenshot) GetImage() []string {
+	if m != nil {
+		return m.Image
+	}
+	return nil
 }
 
 func init() {
 	proto.RegisterType((*TestRequest)(nil), "floodchrome.TestRequest")
 	proto.RegisterType((*TestResult)(nil), "floodchrome.TestResult")
-	proto.RegisterType((*TestResultLog)(nil), "floodchrome.TestResultLog")
-	proto.RegisterType((*TestResultError)(nil), "floodchrome.TestResultError")
-	proto.RegisterType((*TestResultStep)(nil), "floodchrome.TestResultStep")
-	proto.RegisterType((*TestResultComplete)(nil), "floodchrome.TestResultComplete")
+	proto.RegisterType((*TestResult_Log)(nil), "floodchrome.TestResult.Log")
+	proto.RegisterType((*TestResult_Error)(nil), "floodchrome.TestResult.Error")
+	proto.RegisterType((*TestResult_Step)(nil), "floodchrome.TestResult.Step")
+	proto.RegisterType((*TestResult_Complete)(nil), "floodchrome.TestResult.Complete")
+	proto.RegisterType((*TestResult_Measurement)(nil), "floodchrome.TestResult.Measurement")
+	proto.RegisterType((*TestResult_Trace)(nil), "floodchrome.TestResult.Trace")
+	proto.RegisterType((*TestResult_Trace_Network)(nil), "floodchrome.TestResult.Trace.Network")
+	proto.RegisterType((*TestResult_Trace_Screenshot)(nil), "floodchrome.TestResult.Trace.Screenshot")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -502,7 +784,7 @@ func (m *TestResult) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *TestResult_Log) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Log_) MarshalTo(dAtA []byte) (int, error) {
 	i := 0
 	if m.Log != nil {
 		dAtA[i] = 0x12
@@ -516,7 +798,7 @@ func (m *TestResult_Log) MarshalTo(dAtA []byte) (int, error) {
 	}
 	return i, nil
 }
-func (m *TestResult_Error) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Error_) MarshalTo(dAtA []byte) (int, error) {
 	i := 0
 	if m.Error != nil {
 		dAtA[i] = 0x1a
@@ -530,7 +812,7 @@ func (m *TestResult_Error) MarshalTo(dAtA []byte) (int, error) {
 	}
 	return i, nil
 }
-func (m *TestResult_Step) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Step_) MarshalTo(dAtA []byte) (int, error) {
 	i := 0
 	if m.Step != nil {
 		dAtA[i] = 0x22
@@ -544,7 +826,7 @@ func (m *TestResult_Step) MarshalTo(dAtA []byte) (int, error) {
 	}
 	return i, nil
 }
-func (m *TestResult_Complete) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Complete_) MarshalTo(dAtA []byte) (int, error) {
 	i := 0
 	if m.Complete != nil {
 		dAtA[i] = 0x2a
@@ -558,7 +840,35 @@ func (m *TestResult_Complete) MarshalTo(dAtA []byte) (int, error) {
 	}
 	return i, nil
 }
-func (m *TestResultLog) Marshal() (dAtA []byte, err error) {
+func (m *TestResult_Measurement_) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.Measurement != nil {
+		dAtA[i] = 0x32
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(m.Measurement.Size()))
+		n6, err := m.Measurement.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n6
+	}
+	return i, nil
+}
+func (m *TestResult_Trace_) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.Trace != nil {
+		dAtA[i] = 0x3a
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(m.Trace.Size()))
+		n7, err := m.Trace.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n7
+	}
+	return i, nil
+}
+func (m *TestResult_Log) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -568,7 +878,7 @@ func (m *TestResultLog) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TestResultLog) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Log) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -582,7 +892,7 @@ func (m *TestResultLog) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *TestResultError) Marshal() (dAtA []byte, err error) {
+func (m *TestResult_Error) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -592,7 +902,7 @@ func (m *TestResultError) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TestResultError) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Error) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -606,7 +916,7 @@ func (m *TestResultError) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *TestResultStep) Marshal() (dAtA []byte, err error) {
+func (m *TestResult_Step) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -616,7 +926,7 @@ func (m *TestResultStep) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TestResultStep) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Step) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -630,7 +940,7 @@ func (m *TestResultStep) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *TestResultComplete) Marshal() (dAtA []byte, err error) {
+func (m *TestResult_Complete) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -640,7 +950,7 @@ func (m *TestResultComplete) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TestResultComplete) MarshalTo(dAtA []byte) (int, error) {
+func (m *TestResult_Complete) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -650,6 +960,170 @@ func (m *TestResultComplete) MarshalTo(dAtA []byte) (int, error) {
 		i++
 		i = encodeVarintControl(dAtA, i, uint64(len(m.Detail)))
 		i += copy(dAtA[i:], m.Detail)
+	}
+	return i, nil
+}
+
+func (m *TestResult_Measurement) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TestResult_Measurement) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Measurement) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Measurement)))
+		i += copy(dAtA[i:], m.Measurement)
+	}
+	if len(m.Value) > 0 {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Value)))
+		i += copy(dAtA[i:], m.Value)
+	}
+	if len(m.Label) > 0 {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Label)))
+		i += copy(dAtA[i:], m.Label)
+	}
+	if len(m.ResponseCode) > 0 {
+		dAtA[i] = 0x22
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.ResponseCode)))
+		i += copy(dAtA[i:], m.ResponseCode)
+	}
+	return i, nil
+}
+
+func (m *TestResult_Trace) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TestResult_Trace) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Label) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Label)))
+		i += copy(dAtA[i:], m.Label)
+	}
+	if len(m.ResponseCode) > 0 {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.ResponseCode)))
+		i += copy(dAtA[i:], m.ResponseCode)
+	}
+	if m.Data != nil {
+		nn8, err := m.Data.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += nn8
+	}
+	return i, nil
+}
+
+func (m *TestResult_Trace_Network_) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.Network != nil {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(m.Network.Size()))
+		n9, err := m.Network.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n9
+	}
+	return i, nil
+}
+func (m *TestResult_Trace_Screenshot_) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.Screenshot != nil {
+		dAtA[i] = 0x22
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(m.Screenshot.Size()))
+		n10, err := m.Screenshot.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n10
+	}
+	return i, nil
+}
+func (m *TestResult_Trace_Network) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TestResult_Trace_Network) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Har) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintControl(dAtA, i, uint64(len(m.Har)))
+		i += copy(dAtA[i:], m.Har)
+	}
+	return i, nil
+}
+
+func (m *TestResult_Trace_Screenshot) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TestResult_Trace_Screenshot) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Image) > 0 {
+		for _, s := range m.Image {
+			dAtA[i] = 0xa
+			i++
+			l = len(s)
+			for l >= 1<<7 {
+				dAtA[i] = uint8(uint64(l)&0x7f | 0x80)
+				l >>= 7
+				i++
+			}
+			dAtA[i] = uint8(l)
+			i++
+			i += copy(dAtA[i:], s)
+		}
 	}
 	return i, nil
 }
@@ -694,7 +1168,7 @@ func (m *TestResult) Size() (n int) {
 	return n
 }
 
-func (m *TestResult_Log) Size() (n int) {
+func (m *TestResult_Log_) Size() (n int) {
 	var l int
 	_ = l
 	if m.Log != nil {
@@ -703,7 +1177,7 @@ func (m *TestResult_Log) Size() (n int) {
 	}
 	return n
 }
-func (m *TestResult_Error) Size() (n int) {
+func (m *TestResult_Error_) Size() (n int) {
 	var l int
 	_ = l
 	if m.Error != nil {
@@ -712,7 +1186,7 @@ func (m *TestResult_Error) Size() (n int) {
 	}
 	return n
 }
-func (m *TestResult_Step) Size() (n int) {
+func (m *TestResult_Step_) Size() (n int) {
 	var l int
 	_ = l
 	if m.Step != nil {
@@ -721,7 +1195,7 @@ func (m *TestResult_Step) Size() (n int) {
 	}
 	return n
 }
-func (m *TestResult_Complete) Size() (n int) {
+func (m *TestResult_Complete_) Size() (n int) {
 	var l int
 	_ = l
 	if m.Complete != nil {
@@ -730,7 +1204,25 @@ func (m *TestResult_Complete) Size() (n int) {
 	}
 	return n
 }
-func (m *TestResultLog) Size() (n int) {
+func (m *TestResult_Measurement_) Size() (n int) {
+	var l int
+	_ = l
+	if m.Measurement != nil {
+		l = m.Measurement.Size()
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+func (m *TestResult_Trace_) Size() (n int) {
+	var l int
+	_ = l
+	if m.Trace != nil {
+		l = m.Trace.Size()
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+func (m *TestResult_Log) Size() (n int) {
 	var l int
 	_ = l
 	l = len(m.Level)
@@ -740,7 +1232,7 @@ func (m *TestResultLog) Size() (n int) {
 	return n
 }
 
-func (m *TestResultError) Size() (n int) {
+func (m *TestResult_Error) Size() (n int) {
 	var l int
 	_ = l
 	l = len(m.Stack)
@@ -750,7 +1242,7 @@ func (m *TestResultError) Size() (n int) {
 	return n
 }
 
-func (m *TestResultStep) Size() (n int) {
+func (m *TestResult_Step) Size() (n int) {
 	var l int
 	_ = l
 	l = len(m.Detail)
@@ -760,12 +1252,91 @@ func (m *TestResultStep) Size() (n int) {
 	return n
 }
 
-func (m *TestResultComplete) Size() (n int) {
+func (m *TestResult_Complete) Size() (n int) {
 	var l int
 	_ = l
 	l = len(m.Detail)
 	if l > 0 {
 		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+
+func (m *TestResult_Measurement) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Measurement)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	l = len(m.Value)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	l = len(m.Label)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	l = len(m.ResponseCode)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+
+func (m *TestResult_Trace) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Label)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	l = len(m.ResponseCode)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	if m.Data != nil {
+		n += m.Data.Size()
+	}
+	return n
+}
+
+func (m *TestResult_Trace_Network_) Size() (n int) {
+	var l int
+	_ = l
+	if m.Network != nil {
+		l = m.Network.Size()
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+func (m *TestResult_Trace_Screenshot_) Size() (n int) {
+	var l int
+	_ = l
+	if m.Screenshot != nil {
+		l = m.Screenshot.Size()
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+func (m *TestResult_Trace_Network) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Har)
+	if l > 0 {
+		n += 1 + l + sovControl(uint64(l))
+	}
+	return n
+}
+
+func (m *TestResult_Trace_Screenshot) Size() (n int) {
+	var l int
+	_ = l
+	if len(m.Image) > 0 {
+		for _, s := range m.Image {
+			l = len(s)
+			n += 1 + l + sovControl(uint64(l))
+		}
 	}
 	return n
 }
@@ -1004,11 +1575,11 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &TestResultLog{}
+			v := &TestResult_Log{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Result = &TestResult_Log{v}
+			m.Result = &TestResult_Log_{v}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -1036,11 +1607,11 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &TestResultError{}
+			v := &TestResult_Error{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Result = &TestResult_Error{v}
+			m.Result = &TestResult_Error_{v}
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
@@ -1068,11 +1639,11 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &TestResultStep{}
+			v := &TestResult_Step{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Result = &TestResult_Step{v}
+			m.Result = &TestResult_Step_{v}
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -1100,11 +1671,75 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &TestResultComplete{}
+			v := &TestResult_Complete{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Result = &TestResult_Complete{v}
+			m.Result = &TestResult_Complete_{v}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Measurement", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TestResult_Measurement{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Result = &TestResult_Measurement_{v}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Trace", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TestResult_Trace{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Result = &TestResult_Trace_{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -1127,7 +1762,7 @@ func (m *TestResult) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TestResultLog) Unmarshal(dAtA []byte) error {
+func (m *TestResult_Log) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1150,10 +1785,10 @@ func (m *TestResultLog) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TestResultLog: wiretype end group for non-group")
+			return fmt.Errorf("proto: Log: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TestResultLog: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Log: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1206,7 +1841,7 @@ func (m *TestResultLog) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TestResultError) Unmarshal(dAtA []byte) error {
+func (m *TestResult_Error) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1229,10 +1864,10 @@ func (m *TestResultError) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TestResultError: wiretype end group for non-group")
+			return fmt.Errorf("proto: Error: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TestResultError: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Error: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1285,7 +1920,7 @@ func (m *TestResultError) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TestResultStep) Unmarshal(dAtA []byte) error {
+func (m *TestResult_Step) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1308,10 +1943,10 @@ func (m *TestResultStep) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TestResultStep: wiretype end group for non-group")
+			return fmt.Errorf("proto: Step: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TestResultStep: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Step: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1364,7 +1999,7 @@ func (m *TestResultStep) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TestResultComplete) Unmarshal(dAtA []byte) error {
+func (m *TestResult_Complete) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1387,10 +2022,10 @@ func (m *TestResultComplete) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TestResultComplete: wiretype end group for non-group")
+			return fmt.Errorf("proto: Complete: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TestResultComplete: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Complete: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1421,6 +2056,502 @@ func (m *TestResultComplete) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Detail = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipControl(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthControl
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TestResult_Measurement) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowControl
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Measurement: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Measurement: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Measurement", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Measurement = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Value = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Label", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Label = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResponseCode", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResponseCode = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipControl(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthControl
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TestResult_Trace) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowControl
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Trace: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Trace: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Label", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Label = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResponseCode", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResponseCode = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Network", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TestResult_Trace_Network{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Data = &TestResult_Trace_Network_{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Screenshot", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TestResult_Trace_Screenshot{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Data = &TestResult_Trace_Screenshot_{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipControl(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthControl
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TestResult_Trace_Network) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowControl
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Network: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Network: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Har", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Har = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipControl(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthControl
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TestResult_Trace_Screenshot) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowControl
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Screenshot: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Screenshot: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Image", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowControl
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthControl
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Image = append(m.Image, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -1551,28 +2682,39 @@ var (
 func init() { proto.RegisterFile("control.proto", fileDescriptorControl) }
 
 var fileDescriptorControl = []byte{
-	// 354 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0x41, 0x4e, 0xe3, 0x30,
-	0x14, 0x86, 0x93, 0x36, 0xed, 0x74, 0x5e, 0xd4, 0x99, 0xd1, 0xd3, 0x08, 0xac, 0x82, 0x02, 0x8a,
-	0x84, 0xe8, 0x02, 0x45, 0x50, 0x58, 0x21, 0xb1, 0x29, 0x20, 0x05, 0x89, 0x95, 0x81, 0x03, 0x94,
-	0xf4, 0x51, 0x22, 0xdc, 0x3a, 0xd8, 0x0e, 0x67, 0xe0, 0x08, 0x1c, 0x89, 0x25, 0x47, 0x40, 0xe5,
-	0x22, 0x28, 0x6e, 0x5a, 0x28, 0x90, 0x5d, 0x7e, 0xe7, 0xfb, 0xff, 0xfc, 0x7e, 0x79, 0xd0, 0x4e,
-	0xe4, 0xc4, 0x28, 0x29, 0xa2, 0x4c, 0x49, 0x23, 0xd1, 0xbf, 0x11, 0x52, 0x0e, 0x93, 0x5b, 0x25,
-	0xc7, 0x14, 0x5e, 0x81, 0x7f, 0x49, 0xda, 0x70, 0xba, 0xcf, 0x49, 0x1b, 0xec, 0x40, 0x2b, 0x11,
-	0x29, 0x4d, 0xcc, 0xd9, 0x09, 0x73, 0x37, 0xdd, 0xee, 0x6f, 0xbe, 0xd0, 0x88, 0xe0, 0xe5, 0x79,
-	0x3a, 0x64, 0x35, 0x7b, 0x6e, 0x9f, 0x71, 0x05, 0x9a, 0x3a, 0x51, 0x69, 0x66, 0x58, 0xdd, 0x9e,
-	0x96, 0x2a, 0x7c, 0xac, 0x01, 0xcc, 0x72, 0x75, 0x2e, 0x0c, 0x32, 0xf8, 0x35, 0x26, 0xad, 0x07,
-	0x23, 0x2a, 0x53, 0xe7, 0x12, 0x23, 0xa8, 0x0b, 0x39, 0xb2, 0x99, 0x7e, 0xaf, 0x13, 0x7d, 0xaa,
-	0x16, 0x7d, 0xf8, 0xcf, 0xe5, 0x28, 0x76, 0x78, 0x01, 0xe2, 0x01, 0x34, 0x48, 0x29, 0xa9, 0xec,
-	0xf7, 0xfc, 0xde, 0x7a, 0x85, 0xe3, 0xb4, 0x60, 0x62, 0x87, 0xcf, 0x60, 0xdc, 0x03, 0x4f, 0x1b,
-	0xca, 0x98, 0x67, 0x4d, 0x6b, 0x15, 0xa6, 0x0b, 0x43, 0x59, 0xec, 0x70, 0x8b, 0xe2, 0x11, 0xb4,
-	0x12, 0x39, 0xce, 0x04, 0x19, 0x62, 0x0d, 0x6b, 0xdb, 0xa8, 0xb0, 0x1d, 0x97, 0x58, 0xec, 0xf0,
-	0x85, 0xa5, 0xdf, 0x82, 0xa6, 0xb2, 0x6f, 0xc3, 0x2d, 0x68, 0x2f, 0xdd, 0x04, 0xff, 0x43, 0x43,
-	0xd0, 0x03, 0x89, 0x72, 0x14, 0x33, 0x11, 0x6e, 0xc3, 0xdf, 0x2f, 0xf5, 0x0b, 0x50, 0x9b, 0x41,
-	0x72, 0x37, 0x07, 0xad, 0x08, 0xbb, 0xf0, 0x67, 0xb9, 0x72, 0xf1, 0x13, 0x86, 0x64, 0x06, 0xe9,
-	0x3c, 0xb1, 0x54, 0xe1, 0x0e, 0xe0, 0xf7, 0x96, 0x55, 0x74, 0xaf, 0x0f, 0x5e, 0x41, 0xe3, 0x21,
-	0xd4, 0x79, 0x3e, 0x41, 0xf6, 0xc3, 0x6d, 0xed, 0x8e, 0x74, 0x56, 0x2b, 0xe6, 0xb0, 0xeb, 0xf6,
-	0xff, 0x3d, 0x4f, 0x03, 0xf7, 0x65, 0x1a, 0xb8, 0xaf, 0xd3, 0xc0, 0x7d, 0x7a, 0x0b, 0x9c, 0xeb,
-	0xa6, 0xdd, 0xb9, 0xfd, 0xf7, 0x00, 0x00, 0x00, 0xff, 0xff, 0xbf, 0xf7, 0x15, 0xeb, 0x84, 0x02,
-	0x00, 0x00,
+	// 536 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x54, 0x4d, 0x6e, 0xd3, 0x40,
+	0x14, 0xb6, 0x63, 0x3b, 0x49, 0x9f, 0x41, 0xaa, 0x46, 0x15, 0x58, 0x0e, 0x8d, 0xa2, 0x20, 0xa4,
+	0xae, 0x02, 0x0a, 0x62, 0xc3, 0x02, 0x89, 0x14, 0x84, 0x41, 0x85, 0xc5, 0xb4, 0x1c, 0xc0, 0x75,
+	0x1e, 0x49, 0xd4, 0xb1, 0xc7, 0xcc, 0x8c, 0xcb, 0x92, 0x6b, 0xc0, 0x11, 0xb8, 0x09, 0x4b, 0x8e,
+	0x80, 0xc2, 0x45, 0xd0, 0x8c, 0xc7, 0xf9, 0x11, 0x38, 0x3b, 0x7f, 0xe3, 0xef, 0xfb, 0xde, 0xfb,
+	0x9e, 0x9f, 0x07, 0xee, 0x66, 0xbc, 0x50, 0x82, 0xb3, 0x49, 0x29, 0xb8, 0xe2, 0x24, 0xfc, 0xc4,
+	0x38, 0x9f, 0x67, 0x4b, 0xc1, 0x73, 0x1c, 0x7f, 0x84, 0xf0, 0x0a, 0xa5, 0xa2, 0xf8, 0xb9, 0x42,
+	0xa9, 0x48, 0x0c, 0xfd, 0x8c, 0xad, 0xb0, 0x50, 0x6f, 0x5f, 0x45, 0xee, 0xc8, 0x3d, 0x3b, 0xa2,
+	0x1b, 0x4c, 0x08, 0xf8, 0x55, 0xb5, 0x9a, 0x47, 0x1d, 0x73, 0x6e, 0x9e, 0xc9, 0x3d, 0xe8, 0xca,
+	0x4c, 0xac, 0x4a, 0x15, 0x79, 0xe6, 0xd4, 0xa2, 0xf1, 0x8f, 0x1e, 0x40, 0xed, 0x2b, 0x2b, 0xa6,
+	0x48, 0x04, 0xbd, 0x1c, 0xa5, 0x4c, 0x17, 0x68, 0x5d, 0x1b, 0x48, 0x1e, 0x83, 0xc7, 0xf8, 0xc2,
+	0x78, 0x86, 0xd3, 0xc1, 0x64, 0xa7, 0xb5, 0xc9, 0x56, 0x3f, 0xb9, 0xe0, 0x8b, 0xc4, 0xa1, 0x9a,
+	0x49, 0x9e, 0x41, 0x80, 0x42, 0x70, 0x61, 0x0a, 0x86, 0xd3, 0xd3, 0x36, 0xc9, 0x6b, 0x4d, 0x4a,
+	0x1c, 0x5a, 0xb3, 0xc9, 0x14, 0x7c, 0xa9, 0xb0, 0x8c, 0x7c, 0xa3, 0x7a, 0xd0, 0xa6, 0xba, 0x54,
+	0x58, 0x26, 0x0e, 0x35, 0x5c, 0xf2, 0x02, 0xfa, 0x19, 0xcf, 0x4b, 0x86, 0x0a, 0xa3, 0xc0, 0xe8,
+	0x46, 0x6d, 0xba, 0x73, 0xcb, 0x4b, 0x1c, 0xba, 0xd1, 0x90, 0x37, 0x10, 0xe6, 0x98, 0xca, 0x4a,
+	0x60, 0x8e, 0x85, 0x8a, 0xba, 0xc6, 0xe2, 0x61, 0x9b, 0xc5, 0xfb, 0x2d, 0x35, 0x71, 0xe8, 0xae,
+	0x52, 0x67, 0x56, 0x22, 0xcd, 0x30, 0xea, 0x1d, 0xce, 0x7c, 0xa5, 0x49, 0x3a, 0xb3, 0x61, 0xc7,
+	0x03, 0xf0, 0x2e, 0xf8, 0x82, 0x9c, 0x40, 0xc0, 0xf0, 0x16, 0x99, 0x1d, 0x7d, 0x0d, 0xe2, 0x53,
+	0x08, 0xcc, 0x88, 0xf4, 0x6b, 0xa9, 0xd2, 0xec, 0xa6, 0x79, 0x6d, 0x40, 0x3c, 0x04, 0x5f, 0xcf,
+	0x42, 0x7f, 0xe0, 0x39, 0xaa, 0x74, 0xd5, 0xa8, 0x2d, 0x8a, 0xc7, 0xd0, 0x6f, 0x32, 0xb7, 0x72,
+	0xbe, 0x42, 0xb8, 0x13, 0x8a, 0x8c, 0xf6, 0xc7, 0x51, 0x73, 0xf7, 0x72, 0x9e, 0x40, 0x70, 0x9b,
+	0xb2, 0x0a, 0xed, 0x8a, 0xd5, 0xc0, 0xf4, 0x9f, 0x5e, 0x23, 0xb3, 0x2b, 0x56, 0x03, 0x32, 0x86,
+	0x3b, 0x02, 0x65, 0xc9, 0x0b, 0x89, 0xe7, 0x7c, 0x8e, 0xe6, 0xc3, 0x1e, 0xd1, 0xbd, 0xb3, 0xf8,
+	0x7b, 0x07, 0x02, 0x33, 0x93, 0xad, 0x87, 0x7b, 0xc8, 0xa3, 0xf3, 0xaf, 0x07, 0x79, 0x09, 0xbd,
+	0x02, 0xd5, 0x17, 0x2e, 0x6e, 0xec, 0xc6, 0x3d, 0x3a, 0x38, 0xfd, 0xc9, 0x87, 0x9a, 0x9c, 0x38,
+	0xb4, 0xd1, 0x91, 0x77, 0x00, 0x32, 0x13, 0x88, 0x85, 0x5c, 0x72, 0x65, 0x37, 0xf0, 0xec, 0xb0,
+	0xcb, 0xe5, 0x86, 0x9f, 0x38, 0x74, 0x47, 0x1d, 0x0f, 0xa0, 0x67, 0x2b, 0x90, 0x63, 0xf0, 0x96,
+	0xa9, 0xb0, 0x89, 0xf4, 0x63, 0x3c, 0x06, 0xd8, 0x0a, 0x75, 0xe6, 0x55, 0x5e, 0xff, 0x72, 0x9e,
+	0xce, 0x6c, 0xc0, 0xac, 0x0b, 0xfe, 0x3c, 0x55, 0xe9, 0xac, 0x0f, 0x5d, 0x61, 0x2a, 0x4e, 0x67,
+	0xe0, 0xeb, 0xfa, 0xe4, 0x39, 0x78, 0xb4, 0x2a, 0x48, 0xf4, 0x9f, 0xce, 0xcc, 0xe5, 0x10, 0xdf,
+	0x6f, 0xe9, 0xf9, 0x89, 0x3b, 0x3b, 0xfe, 0xb9, 0x1e, 0xba, 0xbf, 0xd6, 0x43, 0xf7, 0xf7, 0x7a,
+	0xe8, 0x7e, 0xfb, 0x33, 0x74, 0xae, 0xbb, 0xe6, 0xb2, 0x79, 0xfa, 0x37, 0x00, 0x00, 0xff, 0xff,
+	0xe3, 0x29, 0xa7, 0x14, 0x7d, 0x04, 0x00, 0x00,
 }
