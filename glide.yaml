@@ -5,3 +5,5 @@ import:
 - package: google.golang.org/grpc
   version: ^1.9.1
 - package: github.com/tcnksm/go-input
+- package: github.com/gdamore/tcell
+  version: ^1.0.0
