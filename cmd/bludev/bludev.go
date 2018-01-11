@@ -9,21 +9,17 @@ import (
 	"os"
 	"path/filepath"
 
-	pb "github.com/flood-io/cli/proto"
-	"google.golang.org/grpc"
+	"github.com/flood-io/cli/floodchrome"
+	controlPB "github.com/flood-io/cli/proto"
 )
 
 type BLUDev struct {
+	LaunchDevtoolsMode bool
 }
 
-type testServer struct {
+func (b *BLUDev) floodChromeClient() (client *floodchrome.Client, err error) {
+	return floodchrome.NewClient("localhost:50051")
 }
-
-func (t *testServer) Run(*pb.TestRequest, pb.Test_RunServer) error {
-	return nil
-}
-
-var _ pb.TestServer = (*testServer)(nil)
 
 func (b *BLUDev) Run(scriptFile string) (err error) {
 	fmt.Println("running dev-blu")
@@ -39,25 +35,16 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 		return
 	}
 
-	serverAddr := "localhost:50051"
-
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
-
-	conn, err := grpc.Dial(serverAddr, opts...)
+	client, err := b.floodChromeClient()
 	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
+		return
 	}
-	defer conn.Close()
-
-	client := pb.NewTestClient(conn)
+	defer client.Close()
 
 	fmt.Printf("client = %+v\n", client)
 
-	test := &pb.TestRequest{
-		ClientID: "123",
-		Uuid:     "456",
-		Script:   string(scriptBytes),
+	test := &controlPB.TestRequest{
+		Script: string(scriptBytes),
 	}
 
 	fmt.Println("streaming")
@@ -85,7 +72,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 			fmt.Printf("[meas ] %s - %s - %v\n", result.Message, measurementM.Measurement, measurementM.Value)
 		} else if traceM := result.GetTrace(); traceM != nil {
 			fmt.Printf("[trace] %s - %s\n", result.Message, traceM.ResponseCode)
-			fmt.Printf("traceM.String() = %+v\n", traceM.String())
+			// fmt.Printf("traceM.String() = %+v\n", traceM.String())
 			if networkT := traceM.GetNetwork(); networkT != nil {
 				err = writeNetworkTrace(networkT)
 				if err != nil {
@@ -110,7 +97,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 	return
 }
 
-func writeNetworkTrace(t *pb.TestResult_Trace_Network) (err error) {
+func writeNetworkTrace(t *controlPB.TestResult_Trace_Network) (err error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return

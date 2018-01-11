@@ -14,7 +14,12 @@ var bluDevCmd = &cobra.Command{
 	Use:   "dev-blu",
 	Short: "Develop & debug yourflood BLU script",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := bluDev.Run(args[0])
+		var err error
+		if bluDev.LaunchDevtoolsMode {
+			err = bluDev.LaunchDevtools()
+		} else {
+			err = bluDev.Run(args[0])
+		}
 		if err != nil {
 			log.Fatalf("failed to run dev-blu %s", err)
 		}
@@ -23,4 +28,6 @@ var bluDevCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(bluDevCmd)
+
+	bluDevCmd.Flags().BoolVarP(&bluDev.LaunchDevtoolsMode, "devtools", "d", false, "launch chrome instance devtools connected to flood-chrome BLU dev mode")
 }
