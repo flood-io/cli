@@ -9,16 +9,24 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/flood-io/cli/floodchrome"
-	pb "github.com/flood-io/go-wrenches/floodchrome"
+	floodchromeClient "github.com/flood-io/go-wrenches/floodchromeclient/client"
+	floodchromeTest"github.com/flood-io/go-wrenches/floodchromeclient/test"
 )
 
 type BLUDev struct {
 	LaunchDevtoolsMode bool
 }
 
-func (b *BLUDev) floodChromeClient() (client *floodchrome.Client, err error) {
-	return floodchrome.NewClient("localhost:5000")
+func (b *BLUDev) floodchromeClient() (client *floodchromeClient.FloodchromeProto, err error) {
+	client = floodchromeClient.NewHTTPClientWithConfig(nil, &floodchromeClient.TransportConfig{
+		Host:     "localhost:5000",
+		BasePath: "/",
+		Schemes:  []string{"https"},
+	})
+
+	bearerTokenAuth := httptransport.BearerToken(os.Getenv("API_ACCESS_TOKEN"))
+
+	return
 }
 
 func (b *BLUDev) Run(scriptFile string) (err error) {
@@ -35,11 +43,15 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 		return
 	}
 
-	client, err := b.floodChromeClient()
+	client, err := b.floodchromeClient()
 	if err != nil {
 		return
 	}
-	defer client.Close()
+
+	params:=&floodchromeTest.RunParams{}
+	resp, err := client.Test.Run(Run(params, bearerToken)
+		if err!=nil {
+		}
 
 	fmt.Printf("client = %+v\n", client)
 
