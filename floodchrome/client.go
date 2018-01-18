@@ -3,7 +3,7 @@ package floodchrome
 import (
 	"context"
 
-	pb "github.com/flood-io/cli/proto"
+	pb "github.com/flood-io/go-wrenches/floodchrome"
 	"google.golang.org/grpc"
 )
 

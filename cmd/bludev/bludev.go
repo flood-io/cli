@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/flood-io/cli/floodchrome"
-	controlPB "github.com/flood-io/cli/proto"
+	pb "github.com/flood-io/go-wrenches/floodchrome"
 )
 
 type BLUDev struct {
@@ -18,7 +18,7 @@ type BLUDev struct {
 }
 
 func (b *BLUDev) floodChromeClient() (client *floodchrome.Client, err error) {
-	return floodchrome.NewClient("localhost:50051")
+	return floodchrome.NewClient("localhost:5000")
 }
 
 func (b *BLUDev) Run(scriptFile string) (err error) {
@@ -43,7 +43,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 
 	fmt.Printf("client = %+v\n", client)
 
-	test := &controlPB.TestRequest{
+	test := &pb.TestRequest{
 		Script: string(scriptBytes),
 	}
 
@@ -97,7 +97,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 	return
 }
 
-func writeNetworkTrace(t *controlPB.TestResult_Trace_Network) (err error) {
+func writeNetworkTrace(t *pb.TestResult_Trace_Network) (err error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return
