@@ -1,14 +1,13 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 
+	"github.com/flood-io/cli/config"
 	"github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
 	input "github.com/tcnksm/go-input"
@@ -42,33 +41,11 @@ type payload struct {
  * }
  */
 
-type PasswordTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	CreatedAt   int    `json:"created_at"`
-	Data        struct {
-		Id         string `json:"id"`
-		Attributes struct {
-			FullName string `json:"full-name"`
-		}
-	}
-}
-
-const authenticationFile string = ".flood.json"
-
-func GetAuthenticationFile() *PasswordTokenResponse {
-	data, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), authenticationFile))
-	if err != nil {
-		return nil
-	}
-	responsePayload := &PasswordTokenResponse{}
-	json.Unmarshal(data, responsePayload)
-	return responsePayload
-}
-
 func Login() (err error) {
-	existingLogin := GetAuthenticationFile()
-	if existingLogin != nil {
-		fmt.Printf("You're already signed in as %s!\n", existingLogin.Data.Attributes.FullName)
+	config := config.DefaultConfig()
+
+	if config.HasAuthData() {
+		fmt.Printf("You're already signed in as %s!\n", config.AuthFullName())
 		return
 	}
 
@@ -117,13 +94,11 @@ func Login() (err error) {
 		return
 	}
 
-	responsePayload := PasswordTokenResponse{}
-	err = json.Unmarshal(b, &responsePayload)
+	err = config.SetAuthTokenData(b)
 	if err != nil {
-		return errors.Wrapf(err, "unable to parse JSON response: (body=%s)", string(b))
+		return errors.Wrapf(err, "unable to set config from JSON response: (body=%s)", string(b))
 	}
 
-	fmt.Printf("Welcome back %s!\n", responsePayload.Data.Attributes.FullName)
-
-	return ioutil.WriteFile(filepath.Join(os.Getenv("HOME"), authenticationFile), b, 0600)
+	fmt.Printf("Welcome back %s!\n", config.AuthFullName())
+	return
 }
