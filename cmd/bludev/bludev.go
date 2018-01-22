@@ -9,29 +9,28 @@ import (
 	"os"
 	"path/filepath"
 
-	floodchromeClient "github.com/flood-io/go-wrenches/floodchromeclient/client"
-	floodchromeTest"github.com/flood-io/go-wrenches/floodchromeclient/test"
+	"github.com/flood-io/cli/config"
+	pb "github.com/flood-io/go-wrenches/floodchrome"
+	fcClient "github.com/flood-io/go-wrenches/floodchrome/client"
 )
 
 type BLUDev struct {
 	LaunchDevtoolsMode bool
+	FloodChromeChannel string
 }
 
-func (b *BLUDev) floodchromeClient() (client *floodchromeClient.FloodchromeProto, err error) {
-	client = floodchromeClient.NewHTTPClientWithConfig(nil, &floodchromeClient.TransportConfig{
-		Host:     "localhost:5000",
-		BasePath: "/",
-		Schemes:  []string{"https"},
-	})
+func (b *BLUDev) floodchromeClient() (client *fcClient.Client, err error) {
+	host := "http://localhost:5000"
 
-	bearerTokenAuth := httptransport.BearerToken(os.Getenv("API_ACCESS_TOKEN"))
-
+	token := config.DefaultConfig().APIToken()
+	client = fcClient.New(host, token)
 	return
 }
 
 func (b *BLUDev) Run(scriptFile string) (err error) {
 	fmt.Println("running dev-blu")
-	fmt.Printf("scriptFile = %+v\n", scriptFile)
+	fmt.Println("flood chrome channel: ", b.FloodChromeChannel)
+	fmt.Println("script file:", scriptFile)
 
 	f, err := os.Open(scriptFile)
 	if err != nil {
@@ -48,18 +47,13 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 		return
 	}
 
-	params:=&floodchromeTest.RunParams{}
-	resp, err := client.Test.Run(Run(params, bearerToken)
-		if err!=nil {
-		}
-
-	fmt.Printf("client = %+v\n", client)
-
 	test := &pb.TestRequest{
-		Script: string(scriptBytes),
+		Script:             string(scriptBytes),
+		FloodChromeVersion: b.FloodChromeChannel,
 	}
 
-	fmt.Println("streaming")
+	currentStep := "<setup>"
+
 	stream, err := client.Run(context.Background(), test)
 	if err != nil {
 		log.Fatalf("%v.Run(_) = _, %v", client, err)
@@ -81,28 +75,34 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 		if logM := result.GetLog(); logM != nil {
 			fmt.Printf("[%5s] %+v\n", logM.Level, result.Message)
 		} else if measurementM := result.GetMeasurement(); measurementM != nil {
-			fmt.Printf("[meas ] %s - %s - %v\n", result.Message, measurementM.Measurement, measurementM.Value)
+			if currentStep != measurementM.Label {
+				currentStep = measurementM.Label
+				fmt.Println("")
+				fmt.Println("==================")
+				fmt.Println("[ step]", currentStep)
+			}
+			fmt.Printf("[ meas] %s - %s - %v\n", measurementM.Label, measurementM.Measurement, measurementM.Value)
+
 		} else if traceM := result.GetTrace(); traceM != nil {
-			fmt.Printf("[trace] %s - %s\n", result.Message, traceM.ResponseCode)
-			// fmt.Printf("traceM.String() = %+v\n", traceM.String())
+			fmt.Printf("[trace] %s - response code %s\n", result.Message, traceM.ResponseCode)
 			if networkT := traceM.GetNetwork(); networkT != nil {
 				err = writeNetworkTrace(networkT)
 				if err != nil {
 					return err
 				}
 			}
+		} else if errorM := result.GetError(); errorM != nil {
+			fmt.Printf("[error] %s\n", result.Message)
+			fmt.Println(errorM.Stack)
+
+		} else if completeM := result.GetComplete(); completeM != nil {
+			break
 
 		} else {
+			fmt.Println("--- unhandled type ---")
+			fmt.Printf("result = %+T\n", result)
 			fmt.Println(result.Message)
 			fmt.Println(result.String())
-		}
-
-		// if traceM := result.GetTrace(); traceM != nil {
-		// fmt.Printf("traceM.TraceDataJSON = %+v\n", traceM.TraceDataJSON)
-		// }
-
-		if completeM := result.GetComplete(); completeM != nil {
-			break
 		}
 	}
 
@@ -115,7 +115,7 @@ func writeNetworkTrace(t *pb.TestResult_Trace_Network) (err error) {
 		return
 	}
 	har := filepath.Join(cwd, "har.json")
-	fmt.Println("writing network trace", har)
+	fmt.Println("[trace] writing network trace", har)
 
 	f, err := os.Create(har)
 	if err != nil {

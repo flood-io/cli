@@ -29,5 +29,7 @@ var bluDevCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(bluDevCmd)
 
-	bluDevCmd.Flags().BoolVarP(&bluDev.LaunchDevtoolsMode, "devtools", "d", false, "launch chrome instance devtools connected to flood-chrome BLU dev mode")
+	bluDevCmd.Flags().StringVar(&bluDev.FloodChromeChannel, "channel", "beta", "launch the latest flood chrome on <channel>. Default: beta")
+
+	// bluDevCmd.Flags().BoolVarP(&bluDev.LaunchDevtoolsMode, "devtools", "d", false, "launch chrome instance devtools connected to flood-chrome BLU dev mode")
 }

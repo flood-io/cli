@@ -35,9 +35,10 @@ func DefaultConfig() *FileConfig {
 }
 
 type AuthTokenData struct {
-	AccessToken string `json:"access_token"`
-	CreatedAt   int    `json:"created_at"`
-	Data        struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	CreatedAt    int    `json:"created_at"`
+	Data         struct {
 		Id         string `json:"id"`
 		Attributes struct {
 			FullName string `json:"full-name"`
@@ -48,6 +49,7 @@ type AuthTokenData struct {
 type ConfigData struct {
 	Null          bool `json:"-"`
 	AuthTokenData AuthTokenData
+	APIToken      string
 }
 
 var NullConfigData = &ConfigData{
@@ -113,6 +115,10 @@ func (f *FileConfig) HasData() bool {
 
 func (f *FileConfig) HasAuthData() bool {
 	return f.Data.AuthTokenData.AccessToken != ""
+}
+
+func (f *FileConfig) APIToken() string {
+	return f.Data.APIToken
 }
 
 func (f *FileConfig) AuthToken() string {
