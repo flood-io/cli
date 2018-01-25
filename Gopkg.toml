@@ -26,6 +26,10 @@
   name = "github.com/flood-io/go-wrenches"
 
 [[constraint]]
+  name="github.com/gogo/protobuf"
+  branch="master"
+
+[[constraint]]
   name = "github.com/google/go-querystring"
 
 [[constraint]]
@@ -41,3 +45,7 @@
 [[constraint]]
   name = "google.golang.org/grpc"
   version = "1.9.1"
+
+[[constraint]]
+  name = "github.com/vbauerster/mpb"
+  version = "3.0.4"

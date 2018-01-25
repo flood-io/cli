@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "feature/floodchrome"
   name = "github.com/flood-io/go-wrenches"
   packages = ["floodchrome","floodchrome/client"]
@@ -32,10 +38,22 @@
   version = "v1.0"
 
 [[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -50,10 +68,22 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "b91bfb9ebec76498946beb6af7c0230c7cc7ba6c"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/tcnksm/go-input"
   packages = ["."]
   revision = "bbe13e92fa7dda71a4e012e3f427df11866c7651"
+
+[[projects]]
+  name = "github.com/vbauerster/mpb"
+  packages = ["cwriter"]
+  revision = "dac08dfacedfef1da943f0491a430e4a8edf5bb0"
+  version = "v3.0.4"
 
 [[projects]]
   branch = "master"
@@ -94,6 +124,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "de5f974b28bd44df3745b551c20b43f3017f782e97d2265eee05f26440500bf6"
+  inputs-digest = "fd7a61fec775d70925062208580b604d85192d1133fcfc7421787ec847d2b491"
   solver-name = "gps-cdcl"
   solver-version = 1
