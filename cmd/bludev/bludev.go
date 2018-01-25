@@ -159,8 +159,10 @@ func (s *state) dumpLife(msg *pb.TestResult) {
 }
 
 func (s *state) dumpLog(msg *pb.TestResult) {
-	if logM := msg.GetLog(); logM != nil {
-		s.ui.Logf("[%5s] %+v\n", logM.Level, msg.Message)
+	if logM := msg.GetServerLog(); logM != nil {
+		s.ui.Logf("[server-%5s] %+v\n", logM.Level, msg.Message)
+	} else if logM := msg.GetScriptLog(); logM != nil {
+		s.ui.Logf("[script-%5s] %+v\n", logM.Level, msg.Message)
 	}
 }
 
