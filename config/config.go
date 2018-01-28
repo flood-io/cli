@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -118,7 +119,12 @@ func (f *FileConfig) HasAuthData() bool {
 }
 
 func (f *FileConfig) APIToken() string {
-	return f.Data.APIToken
+	if f.Data.APIToken == "" {
+		log.Fatal("no APIToken found in config")
+		return ""
+	} else {
+		return f.Data.APIToken
+	}
 }
 
 func (f *FileConfig) AuthToken() string {
