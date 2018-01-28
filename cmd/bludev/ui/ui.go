@@ -116,11 +116,13 @@ func (u *UI) pushUp() {
 	u.pushUpLines++
 }
 
+func (u *UI) SetStatusAndLog(status ...interface{}) {
+	u.status = fmt.Sprintln("[", fmt.Sprint(status...), "]")
+	u.Log(status...)
+}
+
 func (u *UI) SetStatus(status ...interface{}) {
 	u.status = fmt.Sprintln("[", fmt.Sprint(status...), "]")
-	u.setLog(u.status)
-	u.pushUp()
-	u.pushUp()
 	u.Flush()
 }
 
@@ -131,6 +133,11 @@ func (u *UI) setLog(log string) {
 
 func (u *UI) Log(msg ...interface{}) {
 	u.setLog(fmt.Sprintln(msg...))
+	u.Flush()
+}
+
+func (u *UI) HRule() {
+	u.setLog(strings.Repeat("-", u.width))
 	u.Flush()
 }
 

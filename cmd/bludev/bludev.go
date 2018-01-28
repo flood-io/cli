@@ -41,6 +41,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 
 	ui.SetStatus("Flood Chrome Dev Mode")
 
+	ui.Log("Flood Chrome Dev Mode - starting run")
 	ui.Log("flood chrome channel: ", b.FloodChromeChannel)
 	ui.Log("script file:", scriptFile)
 
@@ -160,7 +161,7 @@ func (s *state) dumpLife(msg *pb.TestResult) {
 
 func (s *state) dumpLog(msg *pb.TestResult) {
 	if logM := msg.GetServerLog(); logM != nil {
-		s.ui.Logf("[server-%5s] %+v\n", logM.Level, msg.Message)
+		// s.ui.Logf("[server-%5s] %+v\n", logM.Level, msg.Message)
 	} else if logM := msg.GetScriptLog(); logM != nil {
 		s.ui.Logf("[script-%5s] %+v\n", logM.Level, msg.Message)
 	}
@@ -183,13 +184,13 @@ func (s *state) awaitTest(msg *pb.TestResult) (next stateFn, err error) {
 	next = s.awaitTest
 
 	if msg.Label == "proxy" && matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
-		s.ui.SetStatus("Proxy starting")
+		s.ui.SetStatusAndLog("Proxy starting")
 
 	} else if msg.Label == "floodchrome" && matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
-		s.ui.SetStatus("floodchrome starting")
+		s.ui.SetStatusAndLog("floodchrome starting")
 
 	} else if msg.Label == "test" && matchLifecycle(msg, pb.TestResult_Lifecycle_BeforeTest) {
-		s.ui.SetStatus("Test starting")
+		s.ui.SetStatusAndLog("Test starting")
 		next = s.awaitPlan
 
 	} else {
@@ -221,6 +222,9 @@ func (s *state) awaitNext(msg *pb.TestResult) (next stateFn, err error) {
 
 	if matchLifecycle(msg, pb.TestResult_Lifecycle_BeforeStep) {
 		s.ui.SetStatus("Running step ", msg.Label)
+		s.ui.HRule()
+		s.ui.Log("Running step ", msg.Label)
+
 		s.stepLabel = msg.Label
 		s.setStepStatus("running")
 		next = s.handleStep
@@ -269,7 +273,7 @@ func (s *state) handleStepLifecycle(msg *pb.TestResult, lifecycle *pb.TestResult
 		s.ui.Log("= => skipped")
 	case pb.TestResult_Lifecycle_BeforeStepAction:
 		s.setStepStatus("running (", msg.Label, ")")
-		s.ui.Log("---> running", msg.Label)
+		s.ui.Log("---> action", msg.Label)
 	case pb.TestResult_Lifecycle_AfterStep:
 		s.ui.SetStatus("Finished step ", msg.Label)
 		next = s.awaitNext
