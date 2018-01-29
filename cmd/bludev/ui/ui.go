@@ -97,10 +97,10 @@ func (u *UI) render() {
 	u.cw.WriteString(u.log)
 	u.cw.WriteString("\n")
 	u.cw.WriteString(strings.Repeat("=", u.width))
+	u.cw.WriteString(u.status)
 	u.cw.WriteString("\n")
 	u.renderSlots()
 	u.cw.WriteString("\n")
-	u.cw.WriteString(u.status)
 }
 
 func (u *UI) renderSlots() {
