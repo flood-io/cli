@@ -33,11 +33,11 @@ type state struct {
 	name      string
 	state     stateFn
 	stepLabel string
-	ui        *ui.UI
+	ui        ui.UI
 }
 
 func (b *BLUDev) Run(scriptFile string) (err error) {
-	ui := ui.New()
+	ui := ui.NewSimpleUI()
 
 	ui.SetStatus("Flood Chrome Dev Mode")
 
