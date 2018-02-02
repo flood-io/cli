@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/flood-io/cli/cmd/bludev/ui"
 	"github.com/flood-io/cli/config"
@@ -41,7 +42,6 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 
 	ui.SetStatus("Flood Chrome Dev Mode")
 
-	ui.Log("Flood Chrome Dev Mode - starting run")
 	ui.Log("flood chrome channel: ", b.FloodChromeChannel)
 	ui.Log("script file:", scriptFile)
 
@@ -70,7 +70,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 		name: "testy",
 		ui:   ui,
 	}
-	state.state = state.initialState
+	state.state = state.awaitTest
 
 	stream, err := client.Run(context.Background(), test)
 	if err != nil {
@@ -144,8 +144,8 @@ func (s *state) exhaustLog(msg *pb.TestResult) (next stateFn, err error) {
 	return
 }
 
-func (s *state) setStepStatus(msg ...interface{}) {
-	s.ui.SetSlot(s.stepLabel, fmt.Sprint(msg...))
+func (s *state) setStepStatus(arrow string, msg ...interface{}) {
+	s.ui.SetSlot(fmt.Sprintf("-%s-> %s", arrow, s.stepLabel), fmt.Sprint(msg...))
 }
 
 func dump(msg *pb.TestResult) {
@@ -156,15 +156,16 @@ func dump(msg *pb.TestResult) {
 
 func (s *state) dumpLife(msg *pb.TestResult) {
 	if lifecycleM := msg.GetLifecycle(); lifecycleM != nil {
-		s.ui.Logf("[ life] [%10s] %s\n", lifecycleM.Event.String(), msg.Label)
+		s.ui.Logf("[ life] [%10s] %s", lifecycleM.Event.String(), msg.Label)
 	}
 }
 
 func (s *state) dumpLog(msg *pb.TestResult) {
 	if logM := msg.GetServerLog(); logM != nil {
+		// TODO make a switch --server-logs
 		// s.ui.Logf("[server-%5s] %+v\n", logM.Level, msg.Message)
 	} else if logM := msg.GetScriptLog(); logM != nil {
-		s.ui.Logf("[script-%5s] %+v\n", logM.Level, msg.Message)
+		s.ui.Logf("[script-%5s] %+v", logM.Level, msg.Message)
 	}
 }
 
@@ -173,30 +174,36 @@ func matchLifecycle(msg *pb.TestResult, event pb.TestResult_Lifecycle_Event) boo
 	return lifecycleM != nil && lifecycleM.Event == event
 }
 
-func (s *state) initialState(msg *pb.TestResult) (next stateFn, err error) {
-	s.ui.SetStatus("~~~~ Flood Chrome ~~~~")
-
-	// dump(msg)
-
-	return s.awaitTest(msg)
-}
-
 func (s *state) awaitTest(msg *pb.TestResult) (next stateFn, err error) {
 	next = s.awaitTest
 
 	if msg.Label == "proxy" && matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
-		s.ui.SetStatusAndLog("Proxy starting")
+		s.ui.SetStatus("Proxy starting")
 
-	} else if msg.Label == "floodchrome" && matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
-		s.ui.SetStatusAndLog("floodchrome starting")
+	} else if msg.Label == "floodchrome" {
+		if matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
+			s.ui.SetStatus("setting up test")
 
+		} else if errM := msg.GetError(); errM != nil {
+			return s.handleCompilationError(msg, errM)
+
+		}
 	} else if msg.Label == "test" && matchLifecycle(msg, pb.TestResult_Lifecycle_BeforeTest) {
-		s.ui.SetStatusAndLog("Test starting")
+		s.ui.SetStatus("Test starting")
 		next = s.awaitPlan
 
 	} else {
 		s.dumpLog(msg)
 	}
+
+	return
+}
+
+func (s *state) handleCompilationError(msg *pb.TestResult, errM *pb.TestResult_Error) (next stateFn, err error) {
+	next = s.exhaustNothing
+
+	s.ui.SetStatus("compilation error")
+	s.ui.Log(errM.Message)
 
 	return
 }
@@ -211,8 +218,37 @@ func (s *state) awaitPlan(msg *pb.TestResult) (next stateFn, err error) {
 			s.ui.AddSlot(step)
 		}
 		next = s.awaitNext
+	} else if matchError(msg) {
+		return s.handleTestError(msg)
 	} else {
 		s.dumpLog(msg)
+	}
+
+	return
+}
+
+func matchError(msg *pb.TestResult) bool {
+	errM := msg.GetError()
+	return errM != nil
+}
+
+func (s *state) handleTestError(msg *pb.TestResult) (next stateFn, err error) {
+	next = s.exhaustNothing
+	errM := msg.GetError()
+
+	if errM.Internal {
+		s.ui.SetStatus("Error: internal floodchrome server error")
+		return
+	}
+
+	s.ui.SetStatus("Error running test script")
+
+	s.ui.Log(errM.Message)
+	s.ui.Log()
+	s.ui.Log(errM.Callsite.Code)
+	s.ui.Logf("%s^", strings.Repeat(" ", int(errM.Callsite.Column)))
+	for _, line := range errM.Stack {
+		s.ui.Log(line)
 	}
 
 	return
@@ -222,12 +258,9 @@ func (s *state) awaitNext(msg *pb.TestResult) (next stateFn, err error) {
 	next = s.awaitNext
 
 	if matchLifecycle(msg, pb.TestResult_Lifecycle_BeforeStep) {
-		s.ui.SetStatus("Running step ", msg.Label)
-		s.ui.HRule()
-		s.ui.Log("Running step ", msg.Label)
-
+		s.ui.SetStatus("Running step: ", msg.Label)
 		s.stepLabel = msg.Label
-		s.setStepStatus("running")
+		s.setStepStatus("-", "running")
 		next = s.handleStep
 	} else if matchLifecycle(msg, pb.TestResult_Lifecycle_TestSucceeded) {
 		s.ui.SetStatus("test succeeded")
@@ -264,17 +297,17 @@ func (s *state) handleStepLifecycle(msg *pb.TestResult, lifecycle *pb.TestResult
 
 	switch lifecycle.Event {
 	case pb.TestResult_Lifecycle_StepFailed:
-		s.setStepStatus("failed")
-		s.ui.Log("=!=> failed")
+		s.setStepStatus("!", "failed")
+		// s.ui.Log("=!=> failed")
 	case pb.TestResult_Lifecycle_StepSucceeded:
-		s.setStepStatus("succeeded")
-		s.ui.Log("=v=> succeeded")
+		s.setStepStatus("+", "succeeded")
+		// s.ui.Log("=v=> succeeded")
 	case pb.TestResult_Lifecycle_StepSkipped:
-		s.setStepStatus("skipped")
-		s.ui.Log("= => skipped")
+		s.setStepStatus(" ", "skipped")
+		// s.ui.Log("= => skipped")
 	case pb.TestResult_Lifecycle_BeforeStepAction:
-		s.setStepStatus("running (", msg.Label, ")")
-		s.ui.Log("---> action", msg.Label)
+		s.setStepStatus("-", "running ", msg.Label, "()")
+		// s.ui.Log("---> running", msg.Label)
 	case pb.TestResult_Lifecycle_AfterStep:
 		s.ui.SetStatus("Finished step ", msg.Label)
 		next = s.awaitNext
@@ -287,8 +320,8 @@ func (s *state) handleStepError(msg *pb.TestResult, testError *pb.TestResult_Err
 	next = s.handleStep
 
 	s.ui.Log("-!-> error !")
-	s.ui.Logf("message = %+v\n", msg.Message)
-	s.ui.Logf("testError = %+v\n", testError.Message)
+	s.ui.Logf("message = %+v", msg.Message)
+	s.ui.Logf("testError = %+v", testError.Message)
 
 	return
 }
