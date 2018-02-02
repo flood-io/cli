@@ -62,6 +62,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 
 	test := &pb.TestRequest{
 		Script:             string(scriptBytes),
+		ScriptFilename:     scriptFile,
 		FloodChromeVersion: b.FloodChromeChannel,
 	}
 
