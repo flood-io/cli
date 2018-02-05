@@ -22,7 +22,8 @@ type BLUDev struct {
 }
 
 func (b *BLUDev) floodchromeClient() (client *fcClient.Client, err error) {
-	host := "http://localhost:5000"
+	// host := "http://localhost:5000"
+	host := "https://depth.flood.io"
 
 	token := config.DefaultConfig().APIToken()
 	client = fcClient.New(host, token)
