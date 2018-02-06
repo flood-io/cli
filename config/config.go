@@ -41,6 +41,8 @@ type AuthTokenData struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	CreatedAt    int    `json:"created_at"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
 	Data         struct {
 		Id         string `json:"id"`
 		Attributes struct {
