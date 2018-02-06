@@ -2,8 +2,8 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -13,6 +13,8 @@ type Config interface {
 
 	HasAuthData() bool
 	AuthToken() string
+	AuthTokenE() (string, error)
+
 	AuthFullName() string
 
 	SetAuthTokenData([]byte) error
@@ -118,17 +120,16 @@ func (f *FileConfig) HasAuthData() bool {
 	return f.Data.AuthTokenData.AccessToken != ""
 }
 
-func (f *FileConfig) APIToken() string {
-	if f.Data.APIToken == "" {
-		log.Fatal("no APIToken found in config")
-		return ""
-	} else {
-		return f.Data.APIToken
-	}
-}
-
 func (f *FileConfig) AuthToken() string {
 	return f.Data.AuthTokenData.AccessToken
+}
+
+func (f *FileConfig) AuthTokenE() (string, error) {
+	if f.Data.AuthTokenData.AccessToken == "" {
+		return "", errors.New("no access token found. Please login")
+	} else {
+		return f.Data.AuthTokenData.AccessToken, nil
+	}
 }
 
 func (f *FileConfig) AuthFullName() string {

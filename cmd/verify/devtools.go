@@ -1,6 +1,6 @@
-package bludev
+package verify
 
-func (b *BLUDev) LaunchDevtools() (err error) {
+func (b *VerifyCmd) LaunchDevtools() (err error) {
 	// chrome, err := exec.LookPath("google-chrome")
 	// if err != nil {
 	// return

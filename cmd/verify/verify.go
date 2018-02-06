@@ -1,32 +1,36 @@
-package bludev
+package verify
 
 import (
 	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/flood-io/cli/cmd/bludev/ui"
+	"github.com/flood-io/cli/cmd/verify/ui"
 	"github.com/flood-io/cli/config"
 	pb "github.com/flood-io/go-wrenches/floodchrome"
 	fcClient "github.com/flood-io/go-wrenches/floodchrome/client"
+	"github.com/pkg/errors"
 )
 
-type BLUDev struct {
+type VerifyCmd struct {
 	LaunchDevtoolsMode bool
 	FloodChromeChannel string
+
+	Host    string
+	DevMode string
 }
 
-func (b *BLUDev) floodchromeClient() (client *fcClient.Client, err error) {
-	// host := "http://localhost:5000"
-	host := "https://depth.flood.io"
+func (b *VerifyCmd) floodchromeClient() (client *fcClient.Client, err error) {
+	token, err := config.DefaultConfig().AuthTokenE()
+	if err != nil {
+		return
+	}
 
-	token := config.DefaultConfig().APIToken()
-	client = fcClient.New(host, token)
+	client = fcClient.New(b.Host, token)
 	return
 }
 
@@ -38,26 +42,29 @@ type state struct {
 	ui        ui.UI
 }
 
-func (b *BLUDev) Run(scriptFile string) (err error) {
+func (b *VerifyCmd) Run(scriptFile string) (err error) {
 	ui := ui.NewSimpleUI()
 
-	ui.SetStatus("Flood Chrome Dev Mode")
+	ui.SetStatus("Flood Chrome Verify")
 
 	ui.Log("flood chrome channel: ", b.FloodChromeChannel)
 	ui.Log("script file:", scriptFile)
 
 	f, err := os.Open(scriptFile)
 	if err != nil {
+		err = errors.Wrapf(err, "unable to open script at %s", scriptFile)
 		return
 	}
 
 	scriptBytes, err := ioutil.ReadAll(f)
 	if err != nil {
+		err = errors.Wrap(err, "unable to read script contents")
 		return
 	}
 
 	client, err := b.floodchromeClient()
 	if err != nil {
+		err = errors.Wrap(err, "unable to init flood-chrome client")
 		return
 	}
 
@@ -75,7 +82,8 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 
 	stream, err := client.Run(context.Background(), test)
 	if err != nil {
-		log.Fatalf("%v.Run(_) = _, %v", client, err)
+		err = errors.Wrap(err, "unable to call test.Run")
+		return
 	}
 	for {
 		result, err := stream.Recv()
@@ -83,7 +91,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("stream %v.Run(_) = _, %v", client, err)
+			return errors.Wrap(err, "error on test result stream")
 		}
 
 		// state.dumpLife(result)
@@ -94,7 +102,7 @@ func (b *BLUDev) Run(scriptFile string) (err error) {
 
 		err = state.next(result)
 		if err != nil {
-			log.Fatalf("error handling message %v", err)
+			return errors.Wrap(err, "error handling test result message")
 		}
 	}
 

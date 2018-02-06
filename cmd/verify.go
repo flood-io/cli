@@ -3,33 +3,38 @@ package cmd
 import (
 	"log"
 
-	"github.com/flood-io/cli/cmd/bludev"
+	verifyPkg "github.com/flood-io/cli/cmd/verify"
 	"github.com/spf13/cobra"
 )
 
-var bluDev bludev.BLUDev
+var verify verifyPkg.VerifyCmd
 
 // loginCmd represents the login command
-var bluDevCmd = &cobra.Command{
-	Use:   "dev-blu",
-	Short: "Develop & debug yourflood BLU script",
+var verifyCmd = &cobra.Command{
+	Use:   "verify",
+	Short: "flood verify allows you to verify and debug your flood scripts during development",
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
-		if bluDev.LaunchDevtoolsMode {
-			err = bluDev.LaunchDevtools()
+		if verify.LaunchDevtoolsMode {
+			err = verify.LaunchDevtools()
 		} else {
-			err = bluDev.Run(args[0])
+			err = verify.Run(args[0])
 		}
 		if err != nil {
-			log.Fatalf("failed to run dev-blu %s", err)
+			log.Fatalf("failed to run verify %s", err)
 		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(bluDevCmd)
+	RootCmd.AddCommand(verifyCmd)
 
-	bluDevCmd.Flags().StringVar(&bluDev.FloodChromeChannel, "channel", "beta", "launch the latest flood chrome on <channel>. Default: beta")
+	verifyCmd.Flags().StringVar(&verify.FloodChromeChannel, "channel", "beta", "launch the latest flood chrome on <channel>. Default: beta")
 
-	// bluDevCmd.Flags().BoolVarP(&bluDev.LaunchDevtoolsMode, "devtools", "d", false, "launch chrome instance devtools connected to flood-chrome BLU dev mode")
+	// hidden dev-only flags
+	verifyCmd.Flags().StringVar(&verify.Host, "host", "https://depth.flood.io", "")
+	verifyCmd.Flags().StringVar(&verify.DevMode, "devmode", "", "")
+
+	verifyCmd.Flags().MarkHidden("devmode")
+	verifyCmd.Flags().MarkHidden("host")
 }
