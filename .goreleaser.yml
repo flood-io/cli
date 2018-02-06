@@ -1,0 +1,60 @@
+project_name: cli
+release:
+  github:
+    owner: flood-io
+    name: cli
+  name_template: '{{.Tag}}'
+
+# brew:
+  # commit_author:
+    # name: goreleaserbot
+    # email: goreleaser@carlosbecker.com
+  # install: bin.install "cli"
+
+builds:
+- goos:
+  - linux
+  - darwin
+  goarch:
+  - amd64
+  targets:
+  - linux_amd64
+  - darwin_amd64
+  main: .
+  ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+  binary: flood
+  lang: go
+# archive:
+  # name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    # }}v{{ .Arm }}{{ end }}'
+  # format: tar.gz
+  # files:
+  # - licence*
+  # - LICENCE*
+  # - license*
+  # - LICENSE*
+  # - readme*
+  # - README*
+  # - changelog*
+  # - CHANGELOG*
+# fpm:
+  # name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    # }}v{{ .Arm }}{{ end }}'
+  # bindir: /usr/local/bin
+# snapcraft:
+  # name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    # }}v{{ .Arm }}{{ end }}'
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+dist: dist
+# sign:
+  # cmd: gpg
+  # args:
+  # - --output
+  # - $signature
+  # - --detach-sig
+  # - $artifact
+  # signature: ${artifact}.sig
+  # artifacts: none
