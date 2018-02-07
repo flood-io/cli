@@ -42,21 +42,18 @@ type payload struct {
  * }
  */
 
-func Login(force bool) (err error) {
-	config := config.DefaultAuthConfig()
+func Login(force bool, cache config.AuthCache) (err error) {
+	if force {
+		cache.Clear()
+	}
 
-	return LoginWithConfig(force, config)
-}
-
-func LoginWithAuthCache(force bool, cache config.AuthCache) (err error) {
 	switch cache.State() {
-	case cache.LoggedIn:
+	case config.LoggedIn:
 		fmt.Printf("You're already signed in as %s\n", cache.FullName())
 		return
 	case config.Expired:
-		fmt.Printf("Your auth token has expired. Please rerun:\n")
-		fmt.Printf("flood login --force\n")
-		return
+		fmt.Printf("Your auth token has expired. Please re-log in:\n")
+		cache.Clear()
 	}
 
 	ui := &input.UI{
@@ -109,7 +106,7 @@ func LoginWithAuthCache(force bool, cache config.AuthCache) (err error) {
 		return errors.Wrapf(err, "unable to set cache auth data from JSON response: (body=%s)", string(b))
 	}
 
-	if cache.State() != cache.LoggedIn {
+	if cache.State() != config.LoggedIn {
 		return errors.New("Assertion failed: cache state != logged in")
 	}
 

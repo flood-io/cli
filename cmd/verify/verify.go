@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/flood-io/cli/cmd/verify/ui"
-	"github.com/flood-io/cli/config"
 	pb "github.com/flood-io/go-wrenches/floodchrome"
 	fcClient "github.com/flood-io/go-wrenches/floodchrome/client"
 	"github.com/pkg/errors"
@@ -24,12 +23,7 @@ type VerifyCmd struct {
 	DevMode string
 }
 
-func (b *VerifyCmd) floodchromeClient() (client *fcClient.Client, err error) {
-	token, err := config.DefaultConfig().AuthTokenE()
-	if err != nil {
-		return
-	}
-
+func (b *VerifyCmd) floodchromeClient(token string) (client *fcClient.Client, err error) {
 	client = fcClient.New(b.Host, token)
 	return
 }
@@ -42,7 +36,7 @@ type state struct {
 	ui        ui.UI
 }
 
-func (b *VerifyCmd) Run(scriptFile string) (err error) {
+func (b *VerifyCmd) Run(authToken string, scriptFile string) (err error) {
 	ui := ui.NewSimpleUI()
 
 	ui.SetStatus("Flood Chrome Verify")
@@ -62,7 +56,7 @@ func (b *VerifyCmd) Run(scriptFile string) (err error) {
 		return
 	}
 
-	client, err := b.floodchromeClient()
+	client, err := b.floodchromeClient(authToken)
 	if err != nil {
 		err = errors.Wrap(err, "unable to init flood-chrome client")
 		return

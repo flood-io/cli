@@ -23,7 +23,8 @@ package cmd
 import (
 	"log"
 
-	"github.com/flood-io/cli/client"
+	"github.com/flood-io/cli/config"
+	"github.com/flood-io/cli/oauthclient"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +35,9 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Authenticates with Flood so you can use the other commands",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := client.Login(force)
+		cache := config.DefaultAuthCache()
+
+		err := oauthclient.Login(force, cache)
 		if err != nil {
 			log.Fatalf("Unable to login: %s", err)
 		}
@@ -44,5 +47,5 @@ var loginCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().BoolVarP(&force, "force", "f", false, "Force login even if we already have cached data")
+	loginCmd.Flags().BoolVarP(&force, "force", "f", false, "Force login even if we already have cached data.")
 }
