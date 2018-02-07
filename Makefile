@@ -17,6 +17,7 @@ build-docker :
 
 ci-local: 
 	export BUILDKITE_COMMIT=${GIT_SHA} ; \
+	export BUILDKITE_TAG=yes_trigger_a_build ; \
 	export GITHUB_TOKEN=${GITHUB_TOKEN} ; \
 	export LOCAL_ONLY=1 ; \
 	export DEBUG=1 ; \
