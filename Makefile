@@ -18,7 +18,7 @@ build-docker :
 ci-local: 
 	export BUILDKITE_COMMIT=${GIT_SHA} ; \
 	export GITHUB_TOKEN=${GITHUB_TOKEN} ; \
-	export NO_PUSH=1 ; \
+	export LOCAL_ONLY=1 ; \
 	export DEBUG=1 ; \
 	./scripts/ci/build.sh &&\
 	./scripts/ci/test.sh &&\

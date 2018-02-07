@@ -11,7 +11,7 @@ echo "--- Docker build"
 docker build --build-arg GIT_SHA=${SHORT_SHA}  --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t $DOCKER_IMAGE .
 
 echo "--- Docker push"
-if [[ $NO_PUSH ]]; then
+if [[ $LOCAL_ONLY ]]; then
   echo "(not pushing)"
 else
   docker push $DOCKER_IMAGE
