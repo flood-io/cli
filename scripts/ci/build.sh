@@ -10,12 +10,14 @@ source $HERE/defaults.sh
 echo "--- Docker build"
 docker build --build-arg GIT_SHA=${SHORT_SHA}  --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t $DOCKER_IMAGE .
 
-echo "--- Docker push"
-if [[ $LOCAL_ONLY ]]; then
-  echo "(not pushing)"
-else
-  docker push $DOCKER_IMAGE
-fi
+# XXX if ops becomes multi-machine handle this!
+# echo "--- Docker push"
+# if [[ $LOCAL_ONLY ]]; then
+  # echo "(not pushing)"
+# else
+  # echo "(not pushing)"
+  # docker push $DOCKER_IMAGE
+# fi
 
 echo "--- Check test dependencies"
 docker run --rm $DOCKER_IMAGE goreleaser help  1> /dev/null && echo OK || exit 1
