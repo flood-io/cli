@@ -89,3 +89,38 @@ func Test_AuthCache_expired(t *testing.T) {
 	as.Equal(Expired, state)
 	as.Nil(err)
 }
+
+func Test_AuthCache_SetAuthData(t *testing.T) {
+	as := assert.New(t)
+	dir, err := ioutil.TempDir("", "flood-cli-test")
+	defer os.RemoveAll(dir)
+	as.Nil(err)
+
+	configPath := filepath.Join(dir, "auth.json")
+	c, err := NewFileAuthCache(configPath)
+
+	now := time.Now()
+	err = c.SetAuthData([]byte(tokenResponse(now, 10*time.Minute)))
+	as.Nil(err)
+
+	c2, err := NewFileAuthCache(configPath)
+
+	as.Equal(LoggedIn, c2.State())
+	as.Equal("Lachie Cox", c2.FullName())
+	as.Equal("access-token", c2.Token())
+}
+
+func Test_AuthCache_ReadBeforeLogin(t *testing.T) {
+	as := assert.New(t)
+	dir, err := ioutil.TempDir("", "flood-cli-test")
+	defer os.RemoveAll(dir)
+	as.Nil(err)
+
+	configPath := filepath.Join(dir, "auth.json")
+	c, err := NewFileAuthCache(configPath)
+
+	as.Nil(err)
+
+	as.Equal("", c.Token())
+	as.Equal("", c.FullName())
+}

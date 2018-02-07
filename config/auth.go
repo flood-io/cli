@@ -112,14 +112,33 @@ func (c *FileAuthCache) readData() (err error) {
 	return
 }
 
-func (c *FileAuthCache) SetAuthData(b []byte) (err error) {
+func (c *FileAuthCache) SetAuthData(dataBytes []byte) (err error) {
+	var data AuthTokenData
+	err = json.Unmarshal(dataBytes, &data)
+	if err != nil {
+		return errors.Wrap(err, "unable to unmarshal auth cache data during set")
+	}
+
+	err = ioutil.WriteFile(c.path, dataBytes, 0600)
+	if err != nil {
+		return errors.Wrapf(err, "unable to write auth cache to '%s'", c.path)
+	}
+
 	return
 }
 
 func (c *FileAuthCache) FullName() string {
-	return ""
+	if c.State() != LoggedIn {
+		return ""
+	} else {
+		return c.data.Data.Attributes.FullName
+	}
 }
 
 func (c *FileAuthCache) Token() string {
-	return ""
+	if c.State() != LoggedIn {
+		return ""
+	} else {
+		return c.data.AccessToken
+	}
 }
