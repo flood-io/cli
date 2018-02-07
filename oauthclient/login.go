@@ -1,4 +1,4 @@
-package client
+package oauthclient
 
 import (
 	"fmt"
@@ -20,6 +20,7 @@ type payload struct {
 }
 
 /*
+ * exemplar:
  * {
  *   "access_token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
  *   "token_type": "bearer",
@@ -41,11 +42,20 @@ type payload struct {
  * }
  */
 
-func Login() (err error) {
-	config := config.DefaultConfig()
+func Login(force bool) (err error) {
+	config := config.DefaultAuthConfig()
 
-	if config.HasAuthData() {
-		fmt.Printf("You're already signed in as %s!\n", config.AuthFullName())
+	return LoginWithConfig(force, config)
+}
+
+func LoginWithAuthCache(force bool, cache config.AuthCache) (err error) {
+	switch cache.State() {
+	case cache.LoggedIn:
+		fmt.Printf("You're already signed in as %s\n", cache.FullName())
+		return
+	case config.Expired:
+		fmt.Printf("Your auth token has expired. Please rerun:\n")
+		fmt.Printf("flood login --force\n")
 		return
 	}
 
@@ -63,7 +73,7 @@ func Login() (err error) {
 		return
 	}
 
-	password, err := ui.Ask("What's your password (masked):", &input.Options{
+	password, err := ui.Ask("What's your password:", &input.Options{
 		Default:     "",
 		Required:    true,
 		Loop:        true,
@@ -94,11 +104,15 @@ func Login() (err error) {
 		return
 	}
 
-	err = config.SetAuthTokenData(b)
+	err = cache.SetAuthData(b)
 	if err != nil {
-		return errors.Wrapf(err, "unable to set config from JSON response: (body=%s)", string(b))
+		return errors.Wrapf(err, "unable to set cache auth data from JSON response: (body=%s)", string(b))
 	}
 
-	fmt.Printf("Welcome back %s!\n", config.AuthFullName())
+	if cache.State() != cache.LoggedIn {
+		return errors.New("Assertion failed: cache state != logged in")
+	}
+
+	fmt.Printf("Welcome back %s!\n", cache.FullName())
 	return
 }

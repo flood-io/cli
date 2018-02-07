@@ -1,14 +1,6 @@
 package config
 
-import (
-	"encoding/json"
-	"errors"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-)
-
-type Config interface {
+/* type Config interface {
 	HasData() bool
 
 	HasAuthData() bool
@@ -35,20 +27,6 @@ func DefaultConfig() *FileConfig {
 	}
 
 	return DefaultConfigRef
-}
-
-type AuthTokenData struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	CreatedAt    int    `json:"created_at"`
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-	Data         struct {
-		Id         string `json:"id"`
-		Attributes struct {
-			FullName string `json:"full-name"`
-		}
-	}
 }
 
 type ConfigData struct {
@@ -152,4 +130,4 @@ func (f *FileConfig) ReplaceData() (data *ConfigData) {
 		f.Data = NewConfigData()
 	}
 	return f.Data
-}
+} */
