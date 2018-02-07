@@ -1,0 +1,12 @@
+steps:
+  - command: "scripts/ci/test.sh"
+    label: ":llama: Run Tests"
+    agents:
+      - "agent=buildbox"
+    concurrency: 1
+    concurrency_group: "tests"
+
+  - "wait"
+
+  - command: "scripts/ci/release.sh"
+    label: ":octocat: GitHub release"
