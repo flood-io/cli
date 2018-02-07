@@ -1,5 +1,4 @@
 GIT_SHA = $(shell git rev-parse HEAD)
-GITHUB_TOKEN = $(shell cat ~/.github-token)
 
 test-focus : TEST_PACKAGE = config
 test-focus : TEST_ARGS = #-run client
@@ -9,13 +8,14 @@ test-focus :
 test :
 	go test ./...
 
-release:
+release :
 	goreleaser
 
 build-docker :
 	@docker build --build-arg GIT_SHA=${GIT_SHA} --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} -t cli .
 
-ci-local: 
+ci-local : GITHUB_TOKEN = $(shell cat ~/.github-token)
+ci-local :
 	export BUILDKITE_COMMIT=${GIT_SHA} ; \
 	export BUILDKITE_TAG=yes_trigger_a_build ; \
 	export GITHUB_TOKEN=${GITHUB_TOKEN} ; \
