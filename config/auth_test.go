@@ -1,28 +1,40 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-const tokenResponse = `{
+func tokenResponse(createdAt time.Time, expiresIn time.Duration) string {
+	return fmt.Sprintf(`{
 	"access_token":"access-token",
 	"token_type":"bearer",
-	"expires_in":1209600,
+	"expires_in":%d,
 	"refresh_token":"refresh-token",
 	"scope":"admin",
-	"created_at":1515462909,
+	"created_at":%d,
 	"data": {
 		"id":"15099",
 		"type":"users",
 		"links":{"self":"/api/v3/users/15099"},
 		"attributes":{"full-name":"Lachie Cox","company-name":"Flood IO"}
 	}
-}`
+	}`, int64(expiresIn.Seconds()), createdAt.Unix())
+}
+
+func writeTokenResponse(t *testing.T, path string, createdAt time.Time, expiresIn time.Duration) {
+	// t.Log(tokenResponse(createdAt, expiresIn))
+	err := ioutil.WriteFile(path, []byte(tokenResponse(createdAt, expiresIn)), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
 func Test_AuthCache_not_logged_in(t *testing.T) {
 	as := assert.New(t)
@@ -35,7 +47,9 @@ func Test_AuthCache_not_logged_in(t *testing.T) {
 	c, err := NewFileAuthCache(configPath)
 	as.Nil(err)
 
-	as.Equal(NotLoggedIn, c.State())
+	state, err := c.StateE()
+	as.Equal(NotLoggedIn, state)
+	as.Nil(err)
 }
 
 func Test_AuthCache_logged_in(t *testing.T) {
@@ -46,28 +60,32 @@ func Test_AuthCache_logged_in(t *testing.T) {
 
 	configPath := filepath.Join(dir, "auth.json")
 
-	err = ioutil.WriteFile(configPath, []byte(tokenResponse), 0600)
-	as.Nil(err)
+	now := time.Now()
+	writeTokenResponse(t, configPath, now, 10*time.Minute)
 
 	c, err := NewFileAuthCache(configPath)
 	as.Nil(err)
 
-	as.Equal(LoggedIn, c.State())
+	state, err := c.StateE()
+	as.Equal(LoggedIn, state)
+	as.Nil(err)
 }
 
-/* as.False(c.HasAuthData())
-as.Equal("", c.AuthToken())
-as.Equal("", c.AuthFullName())
+func Test_AuthCache_expired(t *testing.T) {
+	as := assert.New(t)
+	dir, err := ioutil.TempDir("", "flood-cli-test")
+	defer os.RemoveAll(dir)
+	as.Nil(err)
 
-err = c.SetAuthTokenData([]byte(tokenResponse))
-as.Nil(err)
+	configPath := filepath.Join(dir, "auth.json")
 
-b, err := ioutil.ReadFile(c.Path)
-as.Nil(err)
-fmt.Printf("string(b) = %+v\n", string(b))
+	now := time.Now().Add(-15 * time.Minute)
+	writeTokenResponse(t, configPath, now, 10*time.Minute)
 
-as.Contains(string(b), "access-token")
+	c, err := NewFileAuthCache(configPath)
+	as.Nil(err)
 
-c2 := LoadFileConfig(configPath)
-as.Equal("access-token", c2.AuthToken())
-as.Equal("Lachie Cox", c.AuthFullName()) */
+	state, err := c.StateE()
+	as.Equal(Expired, state)
+	as.Nil(err)
+}
