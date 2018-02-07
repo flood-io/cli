@@ -11,5 +11,5 @@ if [[ $BUILDKITE_TAG ]]; then
   if [[ -z $LOCAL_ONLY ]]; then
     docker pull $DOCKER_IMAGE
   fi
-  docker run --rm $DOCKER_IMAGE make release
+  docker run --rm --env GITHUB_TOKEN $DOCKER_IMAGE make release
 fi
