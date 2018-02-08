@@ -11,7 +11,7 @@
   branch = "feature/floodchrome"
   name = "github.com/flood-io/go-wrenches"
   packages = ["floodchrome","floodchrome/client"]
-  revision = "49dd6e71c40c0bbfbf65e7d1329ee3c9070d587a"
+  revision = "3e987a28c16f4c9cbe9b5a13a5246e9f4ecdc417"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -101,7 +101,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
-  revision = "2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1"
+  revision = "f5dfe339be1d06f81b22525fe34671ee7d2c8904"
 
 [[projects]]
   branch = "master"
@@ -113,7 +113,7 @@
   branch = "master"
   name = "golang.org/x/text"
   packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
-  revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
+  revision = "4e4a3210bb54bb31f6ab2cdca2edcc0b50c420c1"
 
 [[projects]]
   branch = "master"
