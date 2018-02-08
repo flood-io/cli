@@ -21,6 +21,7 @@ type VerifyCmd struct {
 
 	Host    string
 	DevMode string
+	Verbose bool
 }
 
 func (b *VerifyCmd) floodchromeClient(token string) (client *fcClient.Client, err error) {
@@ -92,7 +93,9 @@ func (b *VerifyCmd) Run(authToken string, scriptFile string) (err error) {
 
 		// fmt.Printf("result = %+v\n", result)
 		// fmt.Printf("result = %T\n", result)
-		// fmt.Println("result", result.String())
+		if b.Verbose {
+			fmt.Printf("message (%T) %s\n", result.Result, result.String())
+		}
 
 		err = state.next(result)
 		if err != nil {
@@ -179,9 +182,13 @@ func matchLifecycle(msg *pb.TestResult, event pb.TestResult_Lifecycle_Event) boo
 
 func (s *state) awaitTest(msg *pb.TestResult) (next stateFn, err error) {
 	next = s.awaitTest
+	verM := msg.GetFloodChromeVersion()
 
 	if msg.Label == "proxy" && matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
 		s.ui.SetStatus("Proxy starting")
+
+	} else if (msg.Label == "floodchrome") && verM != nil {
+		s.ui.Logf("floodchrome@%s (channel=%s)", verM.Version, verM.Channel)
 
 	} else if msg.Label == "floodchrome" {
 		if matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {

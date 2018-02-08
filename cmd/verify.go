@@ -38,6 +38,7 @@ func init() {
 	RootCmd.AddCommand(verifyCmd)
 
 	verifyCmd.Flags().StringVar(&verify.FloodChromeChannel, "channel", "beta", "launch the latest flood chrome on <channel>.")
+	verifyCmd.Flags().BoolVarP(&verify.Verbose, "verbose", "v", false, "print a lot of messages")
 
 	// hidden dev-only flags
 	verifyCmd.Flags().StringVar(&verify.Host, "host", "https://depth.flood.io", "")
