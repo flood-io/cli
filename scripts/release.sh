@@ -9,7 +9,7 @@ cd $HERE/..
 BUMP=${1:-patch}
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-go get github.com/flood-io/gitsem
+go get -u github.com/flood-io/gitsem
 
 reset="\033[0m"
 red="\033[31m"
