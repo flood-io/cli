@@ -7,13 +7,14 @@ The Flood IO Command Line Interface
 Download the [latest release](https://github.com/flood-io/cli/releases/latest) for your platform, then extract and install it:
 ```bash
 # assuming you're installing version 0.2.0
-tar zxvf cli_0.2.0_darwin_amd64.tar.gz
+cd ~/Downloads
+unzip -d flood flood-0.2.0-darwin-amd64.zip
 
 # move the file to somewhere on your $PATH:
-mv cli_0.2.0_darwin_amd64/flood /usr/local/bin/flood
+mv flood/flood /usr/local/bin/flood
 
 # optionally, tidy up:
-rm -rf cli_0.2.0_darwin_amd64 
+rm -rf flood
 ```
 
 ## Writing Flood Chrome scripts

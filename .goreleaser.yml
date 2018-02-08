@@ -1,4 +1,4 @@
-project_name: cli
+project_name: flood
 release:
   github:
     owner: flood-io
@@ -26,6 +26,16 @@ builds:
     - CGO_ENABLED=0
   binary: flood
   lang: go
+
+archive:
+  name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+
+  # zip is more common for macos
+  format_overrides:
+    - goos: darwin
+      format: zip
+
+
 # fpm:
   # name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
     # }}v{{ .Arm }}{{ end }}'
