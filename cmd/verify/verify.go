@@ -331,7 +331,14 @@ func (s *state) handleStepError(msg *pb.TestResult, testError *pb.TestResult_Err
 
 	s.ui.Log("-!-> error !")
 	s.ui.Logf("message = %+v", msg.Message)
-	s.ui.Logf("testError = %+v", testError.Message)
+
+	s.ui.Logf("%s", testError.Message)
+
+	c := testError.Callsite
+	s.ui.Logf("%s:%d\n%s\n%s^", c.File, c.Line, strings.Replace(c.Code, "\t", "    ", -1), strings.Repeat(" ", int(c.Column)))
+	for _, line := range testError.Stack {
+		s.ui.Logf("  %s", line)
+	}
 
 	return
 }
