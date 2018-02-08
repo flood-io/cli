@@ -1,2 +1,9 @@
 package: github.com/flood-io/cli
-import: []
+import:
+- package: github.com/pkg/errors
+  version: ^0.8.0
+- package: google.golang.org/grpc
+  version: ^1.9.1
+- package: github.com/tcnksm/go-input
+- package: github.com/gdamore/tcell
+  version: ^1.0.0

@@ -21,19 +21,25 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/flood-io/cli/client"
+	"log"
+
+	"github.com/flood-io/cli/config"
+	"github.com/flood-io/cli/oauthclient"
 	"github.com/spf13/cobra"
 )
+
+var force bool
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Authenticates with Flood so you can use the other commands",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := client.Login()
+		cache := config.DefaultAuthCache()
+
+		err := oauthclient.Login(force, cache)
 		if err != nil {
-			fmt.Errorf("login command failed: %s", err.Error())
+			log.Fatalf("Unable to login: %s", err)
 		}
 	},
 }
@@ -41,14 +47,5 @@ var loginCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(loginCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// loginCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
+	loginCmd.Flags().BoolVarP(&force, "force", "f", false, "Force login even if we already have cached data.")
 }

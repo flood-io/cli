@@ -1,0 +1,15 @@
+steps:
+  - command: "scripts/ci/build.sh"
+    label: ":hammer: Build ting"
+
+  - "wait"
+
+  - command: "scripts/ci/test.sh"
+    label: ":llama: Test ting"
+    concurrency: 1
+    concurrency_group: "tests"
+
+  - "wait"
+
+  - command: "scripts/ci/release.sh"
+    label: ":octocat: GitHub release that ting"
