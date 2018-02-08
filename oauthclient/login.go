@@ -54,6 +54,8 @@ func Login(force bool, cache config.AuthCache) (err error) {
 	case config.Expired:
 		fmt.Printf("Your auth token has expired. Please re-log in:\n")
 		cache.Clear()
+	default:
+		fmt.Println("Please re-log in with your flood.io credentials:")
 	}
 
 	ui := &input.UI{
@@ -61,7 +63,7 @@ func Login(force bool, cache config.AuthCache) (err error) {
 		Reader: os.Stdin,
 	}
 
-	username, err := ui.Ask("What's your username:", &input.Options{
+	username, err := ui.Ask("What's your email:", &input.Options{
 		Default:  "",
 		Required: true,
 		Loop:     true,
