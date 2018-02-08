@@ -3,9 +3,6 @@ FROM golang:1.9-alpine
 ARG GITHUB_TOKEN
 RUN \
       apk add --no-cache curl git bash make &&\
-      echo yay
-
-RUN \
       echo installing dep &&\
       mkdir -p /tmp/dockerfile &&\
       cd /tmp/dockerfile &&\
@@ -14,9 +11,6 @@ RUN \
         echo "$GODEP_SHA256 dep" | sha256sum &&\
       chmod 0755 dep &&\
       mv dep /usr/bin/dep &&\
-      echo yay
-
-RUN \
       echo installing goreleaser &&\
       curl -fsSL "https://github.com/goreleaser/goreleaser/releases/download/v0.46.4/goreleaser_Linux_x86_64.tar.gz" > goreleaser.tar.gz &&\
       GORELEASER_SHA256=2f3144de881e8204dcbd5c561eb6779bc8b451bddcf977c4c58819f0cce1b670 \
