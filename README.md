@@ -6,7 +6,7 @@ The Flood IO Command Line Interface
 
 Download the [latest release](https://github.com/flood-io/cli/releases/latest) for your platform, then extract and install it:
 ```bash
-# assuming you're installing version 0.2.0
+# assuming you're installing version 0.2.0 on macos (aka 'darwin')
 cd ~/Downloads
 unzip -d flood flood-0.2.0-darwin-amd64.zip
 
@@ -19,7 +19,8 @@ rm -rf flood
 
 ## Writing Flood Chrome scripts
 
-Flood IO now allows you to generate load from Flood Chrome using load scripts written in TypeScript or Javascript.
+Flood IO now allows you to generate load from Flood Chrome using load scripts written in [TypeScript](https://www.typescriptlang.org) or 
+[type-checked Javascript](https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html).
 
 The process for running a load test using Flood Chrome is the same as for other generators (such as JMeter and Gatling):
 you develop and debug a script locally before creating and running a Flood at scale via the [Flood IO](https://flood.io) web interface.
@@ -37,9 +38,9 @@ import { step, TestSettings, Until, By, MouseButtons, Device, Driver } from '@fl
 import * as assert from 'assert'
 export const settings: TestSettings = {
   userAgent: 'my-flood-io-cart-test/1.0',
-	disableCache: true,
-	actionDelay: 0.5,
-	stepDelay: 2.5,
+  disableCache: true,
+  actionDelay: 0.5,
+  stepDelay: 2.5,
 }
 
 /**
@@ -48,11 +49,12 @@ export const settings: TestSettings = {
  * for our site.
  */
 export default () => {
-	step('My Cart', async (browser: Driver) => {
-		await browser.visit('https://challenge.flood.io')
-    ...
+  step('My Cart', async (browser: Driver) => {
+    await browser.visit('https://challenge.flood.io')
+    // ... add more actions, verification etc
   })
   step('My Cart: item added', async (browser: Driver) => {
+    // ... add your actions, verification etc
   })
 }
 ```
@@ -74,10 +76,10 @@ Verify that your script is compiling and running correctly, and is testing the c
 
 Each time fix or tweak your script then, return to step 2 and re-run it.
 
-### 4. Launch a scaled up Flood at [Flood IO](https://flood.io]
+### 4. Launch a scaled up Flood at Flood IO
 
 Once you're happy with the operation of your test script, visit https://flood.io to create a Flood.
-Here, you can run your script on up to 50 Flood Chrome instances per Flood node.
+Here, you can run your script on up to 50 Flood Chrome instances per Flood node for simulating thousands of browser users.
 
 (**Note** we have plans to expand this CLI to allow running fully scaled Floods directly from the command line)
 
