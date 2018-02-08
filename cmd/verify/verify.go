@@ -188,7 +188,7 @@ func (s *state) awaitTest(msg *pb.TestResult) (next stateFn, err error) {
 		s.ui.SetStatus("Proxy starting")
 
 	} else if (msg.Label == "floodchrome") && verM != nil {
-		s.ui.Logf("floodchrome@%s (channel=%s)", verM.Version, verM.Channel)
+		s.ui.Logf("version sha=%s channel=%s", verM.Version, verM.Channel)
 
 	} else if msg.Label == "floodchrome" {
 		if matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
