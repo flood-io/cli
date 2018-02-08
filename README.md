@@ -7,7 +7,7 @@ The Flood IO Command Line Interface
 Download the [latest release](https://github.com/flood-io/cli/releases/latest) for your platform, then extract and install it:
 ```bash
 # assuming you're installing version 0.2.0
-tar zxvf https://github.com/flood-io/cli/releases/download/v0.2.0/cli_0.2.0_darwin_amd64.tar.gz
+tar zxvf cli_0.2.0_darwin_amd64.tar.gz
 
 # move the file to somewhere on your $PATH:
 mv cli_0.2.0_darwin_amd64/flood /usr/local/bin/flood
