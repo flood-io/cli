@@ -27,13 +27,7 @@ func (b *VerifyCmd) floodchromeClient(token string) (client *fcClient.Client, er
 }
 
 func (b *VerifyCmd) Run(authToken string, scriptFile string) (err error) {
-	var test Test = NewLoggingTest(&StatefulTest{})
-
-	// test := (Test)(nil)
-	// &StatefulTest{
-	// ScriptFile: scriptFile,
-	// Channel:    b.FloodChromeChannel,
-	// }
+	var test Test = NewLoggingTest(NewStatefulTest(scriptFile, b.FloodChromeChannel))
 
 	// ui.SetStatus("Flood Chrome Verify")
 

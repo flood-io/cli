@@ -9,9 +9,14 @@ type Test interface {
 
 	UpdateStatus(string)
 
-	SetContainerVersion(string)
-	SetContainerChannel(string)
+	GetScriptPath() string
+	GetChannel() string
 	AssertConfigured()
+
+	SetContainerVersion(string)
+	GetContainerVersion() string
+	SetContainerChannel(string)
+	GetContainerChannel() string
 
 	SetSteps([]string)
 	SetSettings(map[string]string)

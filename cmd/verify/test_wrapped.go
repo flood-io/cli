@@ -4,6 +4,12 @@ import (
 	pb "github.com/flood-io/go-wrenches/floodchrome"
 )
 
+/*
+* Fully wrapped Test.
+*
+* Embed this in your struct so you can wrap a Test, but not have to wrap
+* every single method, since it'll just fall back to this one.
+ */
 var _ Test = (*WrapperTest)(nil)
 
 type WrapperTest struct {
@@ -27,14 +33,30 @@ func (t *WrapperTest) AssertConfigured() {
 	return
 }
 
+func (t *WrapperTest) GetChannel() string {
+	return t.WrappedTest().GetChannel()
+}
+
+func (t *WrapperTest) GetScriptPath() string {
+	return t.WrappedTest().GetScriptPath()
+}
+
 func (t *WrapperTest) SetContainerVersion(v string) {
 	t.WrappedTest().SetContainerVersion(v)
 	return
 }
 
+func (t *WrapperTest) GetContainerVersion() string {
+	return t.WrappedTest().GetContainerVersion()
+}
+
 func (t *WrapperTest) SetContainerChannel(c string) {
 	t.WrappedTest().SetContainerVersion(c)
 	return
+}
+
+func (t *WrapperTest) GetContainerChannel() string {
+	return t.WrappedTest().GetContainerChannel()
 }
 
 func (t *WrapperTest) SetSteps(steps []string) {

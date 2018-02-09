@@ -7,7 +7,7 @@ import (
 )
 
 type StatefulTest struct {
-	ScriptFile string
+	ScriptPath string
 	Channel    string
 
 	ContainerVersion string
@@ -30,6 +30,10 @@ type StatefulTest struct {
 
 var _ Test = (*StatefulTest)(nil)
 
+func NewStatefulTest(scriptPath, channel string) *StatefulTest {
+	return &StatefulTest{ScriptPath: scriptPath, Channel: channel}
+}
+
 type Step struct {
 	Title string
 }
@@ -49,12 +53,28 @@ func (t *StatefulTest) AssertConfigured() {
 	fmt.Println("StatefulTest: AssertConfigured")
 }
 
+func (t *StatefulTest) GetScriptPath() string {
+	return t.ScriptPath
+}
+
+func (t *StatefulTest) GetChannel() string {
+	return t.Channel
+}
+
 func (t *StatefulTest) SetContainerVersion(v string) {
 	t.ContainerVersion = v
 }
 
+func (t *StatefulTest) GetContainerVersion() string {
+	return t.ContainerVersion
+}
+
 func (t *StatefulTest) SetContainerChannel(c string) {
 	t.ContainerChannel = c
+}
+
+func (t *StatefulTest) GetContainerChannel() string {
+	return t.ContainerChannel
 }
 
 func (t *StatefulTest) SetSteps(steps []string) {
