@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/flood-io/cli/cmd/verify/ui"
 	pb "github.com/flood-io/go-wrenches/floodchrome"
 	fcClient "github.com/flood-io/go-wrenches/floodchrome/client"
 	"github.com/pkg/errors"
@@ -28,14 +27,20 @@ func (b *VerifyCmd) floodchromeClient(token string) (client *fcClient.Client, er
 }
 
 func (b *VerifyCmd) Run(authToken string, scriptFile string) (err error) {
-	test := Test{ScriptFile: scriptFile, Channel: b.FloodChromeChannel}
+	var test Test = NewLoggingTest(&StatefulTest{})
 
-	ui.SetStatus("Flood Chrome Verify")
+	// test := (Test)(nil)
+	// &StatefulTest{
+	// ScriptFile: scriptFile,
+	// Channel:    b.FloodChromeChannel,
+	// }
 
-	ui.Log("flood chrome channel: ", b.FloodChromeChannel)
-	ui.Log("script file:", scriptFile)
+	// ui.SetStatus("Flood Chrome Verify")
 
-	test.Configured()
+	// ui.Log("flood chrome channel: ", b.FloodChromeChannel)
+	// ui.Log("script file:", scriptFile)
+
+	test.AssertConfigured()
 
 	f, err := os.Open(scriptFile)
 	if err != nil {

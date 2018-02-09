@@ -1,150 +1,47 @@
 package verify
 
 import (
-	"fmt"
-
 	pb "github.com/flood-io/go-wrenches/floodchrome"
 )
 
-type Test struct {
-	ScriptFile string
-	Channel    string
+type Test interface {
+	Error() error
 
-	ContainerVersion string
-	ContainerChannel string
+	UpdateStatus(string)
 
-	Title       string
-	Description string
+	SetContainerVersion(string)
+	SetContainerChannel(string)
+	AssertConfigured()
 
-	StepKeys []string
-	Steps    map[string]*Step
+	SetSteps([]string)
+	SetSettings(map[string]string)
+	AssertEnvironmentReady()
 
-	CurrentStep *Step
+	AssertReady()
 
-	Settings map[string]string
+	ScriptError(message string, maybeErrors ...*pb.TestResult_Error)
+	// XXX merge^
+	CompilationError(compError *pb.TestResult_Error)
 
-	Status string
+	AssertStep(msg string, step string) bool
 
-	CurrentError error
-}
+	TestBefore(label string)
 
-type Step struct {
-	Title string
-}
+	StepBefore(label string)
 
-func (t *Test) Error() error {
-	return t.CurrentError
-}
+	ActionBefore(label string)
+	ActionAfter(label string)
 
-func (t *Test) UpdateStatus(s string) {
-	t.Status = s
-}
+	StepSucceeded(label string)
+	StepFailed(label string)
+	StepSkipped(label string)
+	StepAfter(label string)
 
-// setters
-func (t *Test) SetContainerVersion(v string) {
-	t.ContainerVersion = v
-}
+	TestSucceeded(label string)
+	TestFailed(label string)
+	TestAfter(label string)
 
-func (t *Test) SetContainerChannel(c string) {
-	t.ContainerChannel = c
-}
+	Exit(label string)
 
-func (t *Test) SetSteps(steps []string) {
-	t.StepKeys = steps
-	t.Steps = make(map[string]*Step, len(steps))
-	for i, step := range steps {
-		t.Steps[step] = &Step{Title: step}
-	}
-}
-
-func (t *Test) SetSettings(settings map[string]string) {
-	t.Settings = settings
-}
-
-func (t *Test) EnvironmentReady() {
-}
-
-func (t *Test) Ready() {
-}
-
-func (t *Test) ScriptError(message string, maybeErrors ...*pb.TestResult_Error) {
-	if len(maybeErrors) > 0 {
-		err = maybeErrors[0]
-	}
-}
-
-func (t *Test) CompilationError(compErr *pb.TestResult_Error) {
-}
-
-// s.ui.Log(errM.Message)
-// s.ui.Log()
-// s.ui.Log(errM.Callsite.Code)
-// s.ui.Logf("%s^", strings.Repeat(" ", int(errM.Callsite.Column)))
-// for _, line := range errM.Stack {
-// s.ui.Log(line)
-// }
-
-// s.ui.Log("-!-> error !")
-// s.ui.Logf("message = %+v", msg.Message)
-
-// s.ui.Logf("%s", testError.Message)
-
-// c := testError.Callsite
-// s.ui.Logf("%s:%d\n%s\n%s^", c.File, c.Line, strings.Replace(c.Code, "\t", "    ", -1), strings.Repeat(" ", int(c.Column)))
-// for _, line := range testError.Stack {
-// s.ui.Logf("  %s", line)
-// }
-
-func (t *Test) AssertStep(msg string, step string) bool {
-	_, ok := t.Steps[step]
-	if !ok {
-		t.CurrentError = fmt.Errorf("%s: unknown step '%s'", msg, step)
-		return false
-	}
-
-	return true
-}
-
-func (t *Test) TestBefore(label string) {
-}
-
-func (t *Test) StepBefore(step string) {
-	if !t.AssertStep("StepBefore", step) {
-		return
-	}
-	t.CurrentStep = t.Steps[step]
-}
-
-func (t *Test) ActionBefore(label string) {
-}
-
-func (t *Test) ActionAfter(label string) {
-}
-
-func (t *Test) StepSucceeded(label string) {
-}
-
-func (t *Test) StepFailed(label string) {
-}
-
-func (t *Test) StepSkipped(label string) {
-}
-
-func (t *Test) StepAfter(label string) {
-	if !t.AssertStep("StepAfter", step) {
-		return
-	}
-	t.CurrentStep = nil
-}
-
-func (t *Test) TestSucceeded(label string) {
-}
-
-func (t *Test) TestFailed(label string) {
-}
-
-func (t *Test) TestAfter(label string) {
-}
-
-func (t *Test) Exit(label string) {
+	WrappedTest() Test
 }

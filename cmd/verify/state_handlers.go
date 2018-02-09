@@ -24,7 +24,7 @@ func (s *state) awaitTest(msg *pb.TestResult) (next stateFn) {
 
 		}
 	} else if msg.Label == "test" && matchLifecycle(msg, pb.TestResult_Lifecycle_BeforeTest) {
-		s.Test.EnvironmentReady()
+		s.Test.AssertEnvironmentReady()
 		next = s.awaitPlan
 
 	} else {
@@ -49,7 +49,7 @@ func (s *state) awaitPlan(msg *pb.TestResult) (next stateFn) {
 	if plan != nil {
 		s.Test.SetSettings(plan.Settings)
 		s.Test.SetSteps(plan.Steps)
-		s.Test.Ready()
+		s.Test.AssertReady()
 
 		next = s.awaitNext
 	} else if matchError(msg) {
@@ -93,7 +93,7 @@ func (s *state) awaitNext(msg *pb.TestResult) (next stateFn) {
 		s.Test.StepAfter(msg.Label)
 
 	case pb.TestResult_Lifecycle_TestSucceeded:
-		s.Test.TestSuccedeed(msg.Label)
+		s.Test.TestSucceeded(msg.Label)
 
 	case pb.TestResult_Lifecycle_TestFailed:
 		s.Test.TestFailed(msg.Label)
@@ -118,9 +118,9 @@ func (s *state) handleStep(msg *pb.TestResult) (next stateFn) {
 	lifecycle := msg.GetLifecycle()
 	testError := msg.GetError()
 	if lifecycle != nil {
-		next, err = s.handleStepLifecycle(msg, lifecycle)
+		next = s.handleStepLifecycle(msg, lifecycle)
 	} else if testError != nil {
-		next, err = s.handleStepError(msg, testError)
+		next = s.handleStepError(msg, testError)
 	} else {
 		s.dumpLog(msg)
 	}

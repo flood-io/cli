@@ -8,7 +8,7 @@ import (
 
 type stateFn func(msg *pb.TestResult) stateFn
 type state struct {
-	Test         *Test
+	Test         Test
 	state        stateFn
 	currentError error
 }
