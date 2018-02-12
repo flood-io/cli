@@ -1,0 +1,26 @@
+{
+  "name": "flood-chrome-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@flood/chrome": "^0.1.17",
+    "@types/node": "^9.4.5",
+    "prettier": "^1.10.2",
+    "tslint": "^5.9.1",
+    "tslint-config-prettier": "^1.7.0",
+    "tslint-plugin-prettier": "^1.3.0",
+    "typescript": "2.7"
+  },
+	"prettier": {
+		"semi": false,
+		"singleQuote": true,
+		"trailingComma": "all",
+		"printWidth": 100,
+		"useTabs": true,
+		"tabWidth": 2,
+		"bracketSpacing": true,
+		"jsxBracketSameLine": true,
+		"arrowParens": "avoid"
+	}
+}
