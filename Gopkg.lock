@@ -44,6 +44,12 @@
   version = "v1.0"
 
 [[projects]]
+  name = "github.com/jteeuwen/go-bindata"
+  packages = ["."]
+  revision = "bbd0c6e271208dce66d8fda4bc536453cd27fc4a"
+  version = "v3.0.7"
+
+[[projects]]
   branch = "master"
   name = "github.com/logrusorgru/aurora"
   packages = ["."]
@@ -136,6 +142,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "45d155c24a0e546d594e0a45c6bcc4f4103f6ffed1d3bd9bcd115bacf067f248"
+  inputs-digest = "f4f75edb204d3abd0e864c32cfd99a079f67a831bbab5e0fe02e4917b83cd861"
   solver-name = "gps-cdcl"
   solver-version = 1
