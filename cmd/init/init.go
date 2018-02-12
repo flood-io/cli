@@ -16,6 +16,7 @@ type InitCmd struct {
 	URL             string
 	WorkingDir      string
 	DestinationPath string
+	Force           bool
 }
 
 func (i *InitCmd) Run(name string) (err error) {
@@ -53,8 +54,6 @@ func (i *InitCmd) Run(name string) (err error) {
 		}
 	}
 
-	fmt.Printf("i = %+v\n", i)
-
 	err = i.populateDestination()
 	if err != nil {
 		return err
@@ -84,7 +83,6 @@ func (i *InitCmd) interactiveConfig(name string) (err error) {
 	}
 
 	i.Name = name
-	fmt.Println("name: ", name)
 
 	return
 }
@@ -112,7 +110,12 @@ func (i *InitCmd) validateDestination() (err error) {
 	}
 
 	if len(names) > 0 {
-		return fmt.Errorf("destination isn't empty! (%s)", i.DestinationPath)
+		if i.Force {
+			fmt.Printf("destination isn't empty! (%s)\nYou specified --force so continuing anyway...\n", i.DestinationPath)
+			return nil
+		} else {
+			return fmt.Errorf("destination isn't empty! (%s)", i.DestinationPath)
+		}
 	}
 
 	return nil

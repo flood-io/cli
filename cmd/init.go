@@ -30,13 +30,6 @@ var initCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(initCmd)
 
-	// verifyCmd.Flags().StringVar(&verify.FloodChromeChannel, "channel", "beta", "launch the latest flood chrome on <channel>.")
-	// verifyCmd.Flags().BoolVarP(&verify.Verbose, "verbose", "v", false, "print a lot of messages")
-
-	// // hidden dev-only flags
-	// verifyCmd.Flags().StringVar(&verify.Host, "host", "https://depth.flood.io", "")
-	// verifyCmd.Flags().StringVar(&verify.DevMode, "devmode", "", "")
-
-	// verifyCmd.Flags().MarkHidden("devmode")
-	// verifyCmd.Flags().MarkHidden("host")
+	initCmd.Flags().StringVar(&initImpl.URL, "url", "https://challenge.flood.io/", "A URL to use in the example template.")
+	initCmd.Flags().BoolVar(&initImpl.Force, "force", false, "Force creation even if it may overwrite existing files.")
 }
