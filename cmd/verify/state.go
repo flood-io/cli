@@ -59,10 +59,11 @@ func (s *state) dumpLife(msg *pb.TestResult) {
 }
 
 func (s *state) dumpLog(msg *pb.TestResult) {
+	// fmt.Printf("msg = %+v\n", msg)
 	if logM := msg.GetServerLog(); logM != nil {
 		// TODO make a switch --server-logs
 		// s.ui.Logf("[server-%5s] %+v\n", logM.Level, msg.Message)
 	} else if logM := msg.GetScriptLog(); logM != nil {
-		fmt.Printf("[script-%5s] %+v\n", logM.Level, msg.Message)
+		s.Test.ScriptLog(logM.Level, msg.Message)
 	}
 }

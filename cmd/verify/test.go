@@ -15,18 +15,24 @@ type Test interface {
 
 	SetContainerVersion(string)
 	GetContainerVersion() string
+
 	SetContainerChannel(string)
 	GetContainerChannel() string
 
-	SetSteps([]string)
 	SetSettings(map[string]string)
+	GetSettings() map[string]string
+	GetSetting(key string) string
+
+	SetSteps([]string)
+	GetSteps() []*Step
+
 	AssertEnvironmentReady()
 
-	AssertReady()
-
-	ScriptError(message string, maybeErrors ...*pb.TestResult_Error)
-	// XXX merge^
 	CompilationError(compError *pb.TestResult_Error)
+	ScriptError(message string, scriptErr *pb.TestResult_Error)
+	InternalScriptError(message string, scriptErr *pb.TestResult_Error)
+
+	ScriptLog(level, message string)
 
 	AssertStep(msg string, step string) bool
 

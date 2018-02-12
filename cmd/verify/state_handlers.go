@@ -8,12 +8,12 @@ func (s *state) awaitTest(msg *pb.TestResult) (next stateFn) {
 	next = s.awaitTest
 
 	if msg.Label == "proxy" && matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
-		s.Test.UpdateStatus("Proxy starting")
+		// s.Test.UpdateStatus("Proxy starting")
 
 	} else if msg.Label == "floodchrome" {
 
 		if matchLifecycle(msg, pb.TestResult_Lifecycle_Setup) {
-			s.Test.UpdateStatus("setting up test")
+			// s.Test.UpdateStatus("setting up test")
 
 		} else if verM := msg.GetFloodChromeVersion(); verM != nil {
 			s.Test.SetContainerVersion(verM.Version)
@@ -49,7 +49,7 @@ func (s *state) awaitPlan(msg *pb.TestResult) (next stateFn) {
 	if plan != nil {
 		s.Test.SetSettings(plan.Settings)
 		s.Test.SetSteps(plan.Steps)
-		s.Test.AssertReady()
+		s.Test.TestBefore(msg.Label)
 
 		next = s.awaitNext
 	} else if matchError(msg) {
@@ -66,12 +66,11 @@ func (s *state) handleTestError(msg *pb.TestResult) (next stateFn) {
 	errM := msg.GetError()
 
 	if errM.Internal {
-		s.Test.ScriptError("Error: internal floodchrome server error")
+		s.Test.InternalScriptError(msg.Message, errM)
 		return
 	}
 
-	s.Test.ScriptError("Error running test script", errM)
-
+	s.Test.ScriptError(msg.Message, errM)
 	return
 }
 
@@ -85,6 +84,8 @@ func (s *state) awaitNext(msg *pb.TestResult) (next stateFn) {
 	}
 
 	switch lifeM.Event {
+	// NOTE pb.TestResult_Lifecycle_BeforeTest consumed in awaitTest
+
 	case pb.TestResult_Lifecycle_BeforeStep:
 		s.Test.StepBefore(msg.Label)
 		next = s.handleStep

@@ -64,9 +64,21 @@ func (t *WrapperTest) SetSteps(steps []string) {
 	return
 }
 
+func (t *WrapperTest) GetSteps() []*Step {
+	return t.WrappedTest().GetSteps()
+}
+
 func (t *WrapperTest) SetSettings(settings map[string]string) {
 	t.WrappedTest().SetSettings(settings)
 	return
+}
+
+func (t *WrapperTest) GetSettings() map[string]string {
+	return t.WrappedTest().GetSettings()
+}
+
+func (t *WrapperTest) GetSetting(key string) string {
+	return t.WrappedTest().GetSetting(key)
 }
 
 func (t *WrapperTest) AssertEnvironmentReady() {
@@ -74,18 +86,23 @@ func (t *WrapperTest) AssertEnvironmentReady() {
 	return
 }
 
-func (t *WrapperTest) AssertReady() {
-	t.WrappedTest().AssertReady()
+func (t *WrapperTest) ScriptError(message string, err *pb.TestResult_Error) {
+	t.WrappedTest().ScriptError(message, err)
 	return
 }
 
-func (t *WrapperTest) ScriptError(message string, maybeErrors ...*pb.TestResult_Error) {
-	t.WrappedTest().ScriptError(message, maybeErrors...)
+func (t *WrapperTest) InternalScriptError(message string, err *pb.TestResult_Error) {
+	t.WrappedTest().InternalScriptError(message, err)
 	return
 }
 
 func (t *WrapperTest) CompilationError(compErr *pb.TestResult_Error) {
 	t.WrappedTest().CompilationError(compErr)
+	return
+}
+
+func (t *WrapperTest) ScriptLog(level, message string) {
+	t.WrappedTest().ScriptLog(level, message)
 	return
 }
 

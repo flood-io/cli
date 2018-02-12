@@ -77,12 +77,28 @@ func (t *StatefulTest) GetContainerChannel() string {
 	return t.ContainerChannel
 }
 
+func (t *StatefulTest) GetSettings() map[string]string {
+	return t.Settings
+}
+
+func (t *StatefulTest) GetSetting(key string) string {
+	return t.Settings[key]
+}
+
 func (t *StatefulTest) SetSteps(steps []string) {
 	t.StepKeys = steps
 	t.Steps = make(map[string]*Step, len(steps))
 	for _, step := range steps {
 		t.Steps[step] = &Step{Title: step}
 	}
+}
+func (t *StatefulTest) GetSteps() []*Step {
+	steps := make([]*Step, len(t.StepKeys))
+	for i, key := range t.StepKeys {
+		steps[i] = t.Steps[key]
+	}
+
+	return steps
 }
 
 func (t *StatefulTest) SetSettings(settings map[string]string) {
@@ -92,43 +108,17 @@ func (t *StatefulTest) SetSettings(settings map[string]string) {
 func (t *StatefulTest) AssertEnvironmentReady() {
 }
 
-func (t *StatefulTest) AssertReady() {
+func (t *StatefulTest) ScriptError(message string, scriptErr *pb.TestResult_Error) {
 }
 
-func (t *StatefulTest) ScriptError(message string, maybeErrors ...*pb.TestResult_Error) {
-	var scriptError *pb.TestResult_Error
-	if len(maybeErrors) > 0 {
-		scriptError = maybeErrors[0]
-	}
-
-	if scriptError == nil {
-		// synthesise one...
-	}
-
-	fmt.Printf("scriptError = %+v\n", scriptError)
+func (t *StatefulTest) InternalScriptError(message string, scriptErr *pb.TestResult_Error) {
 }
 
 func (t *StatefulTest) CompilationError(compErr *pb.TestResult_Error) {
 }
 
-// s.ui.Log(errM.Message)
-// s.ui.Log()
-// s.ui.Log(errM.Callsite.Code)
-// s.ui.Logf("%s^", strings.Repeat(" ", int(errM.Callsite.Column)))
-// for _, line := range errM.Stack {
-// s.ui.Log(line)
-// }
-
-// s.ui.Log("-!-> error !")
-// s.ui.Logf("message = %+v", msg.Message)
-
-// s.ui.Logf("%s", testError.Message)
-
-// c := testError.Callsite
-// s.ui.Logf("%s:%d\n%s\n%s^", c.File, c.Line, strings.Replace(c.Code, "\t", "    ", -1), strings.Repeat(" ", int(c.Column)))
-// for _, line := range testError.Stack {
-// s.ui.Logf("  %s", line)
-// }
+func (t *StatefulTest) ScriptLog(level, message string) {
+}
 
 func (t *StatefulTest) AssertStep(msg string, step string) bool {
 	_, ok := t.Steps[step]
