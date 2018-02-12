@@ -13,9 +13,14 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialises a Flood Chrome test script and TypeScript environment",
 	Long:  `TODO`,
-	// Args: cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := initImpl.Run()
+		name := ""
+		if len(args) > 0 {
+			name = args[0]
+		}
+
+		err := initImpl.Run(name)
 		if err != nil {
 			log.Fatalf("failed to run flood init: %s", err)
 		}

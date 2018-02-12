@@ -11,7 +11,7 @@ export const settings: TestSettings = {
 }
 
 /**
- * {{.Title}}
+ * {{.Name}}
  * Version: 1.0
  */
 export default () => {
