@@ -119,8 +119,7 @@ func (i *InitCmd) validateDestination() (err error) {
 }
 
 func (i *InitCmd) createDestination() (err error) {
-	fmt.Println("creating dest")
-	return nil
+	return os.MkdirAll(i.DestinationPath, 0755)
 }
 
 func (i *InitCmd) populateDestination() (err error) {
@@ -133,7 +132,6 @@ func (i *InitCmd) populateDestination() (err error) {
 			i.writeAsset(name)
 		}
 	}
-	fmt.Println("populating dest")
 	return nil
 }
 
@@ -154,7 +152,7 @@ func (i *InitCmd) reifyTemplate(name string) (err error) {
 	}
 
 	destPath := filepath.Join(i.DestinationPath, name)
-	out, err := os.Create(destPath)
+	out, err := os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return
 	}
