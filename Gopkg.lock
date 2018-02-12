@@ -44,6 +44,12 @@
   version = "v1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/logrusorgru/aurora"
+  packages = ["."]
+  revision = "ca24023cc0175fdf372518cb1c5062cc86db2634"
+
+[[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
@@ -130,6 +136,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9a4d452c044a1e91b73551893b47e3555dbb5fb6317cdcf69b104a9594969b6f"
+  inputs-digest = "45d155c24a0e546d594e0a45c6bcc4f4103f6ffed1d3bd9bcd115bacf067f248"
   solver-name = "gps-cdcl"
   solver-version = 1
