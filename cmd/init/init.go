@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	initskeleton "github.com/flood-io/cli/static/init-skeleton"
+	au "github.com/logrusorgru/aurora"
 	input "github.com/tcnksm/go-input"
 )
 
@@ -17,9 +18,12 @@ type InitCmd struct {
 	WorkingDir      string
 	DestinationPath string
 	Force           bool
+	Validated       bool
 }
 
 func (i *InitCmd) Run(name string) (err error) {
+	fmt.Println(au.Blue("~~~ Flood Chrome"), au.Green("Init"), au.Blue("~~~"))
+
 	dir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -28,12 +32,17 @@ func (i *InitCmd) Run(name string) (err error) {
 
 	// flood init
 	if name == "" {
-		err = i.interactiveConfig(name)
+		i.DestinationPath = i.WorkingDir
+
+		err = i.validateDestination()
 		if err != nil {
 			return err
 		}
 
-		i.DestinationPath = i.WorkingDir
+		err = i.interactiveConfig(name)
+		if err != nil {
+			return err
+		}
 
 		// flood init name
 	} else {
@@ -41,6 +50,8 @@ func (i *InitCmd) Run(name string) (err error) {
 		i.DestinationPath = filepath.Join(i.WorkingDir, i.Name)
 
 	}
+
+	fmt.Println("Initialising a test script project named", au.Brown(i.Name), "in folder", au.Gray(i.DestinationPath))
 
 	if i.destinationExists() {
 		err = i.validateDestination()
@@ -58,6 +69,20 @@ func (i *InitCmd) Run(name string) (err error) {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(au.Green("done"))
+	fmt.Println()
+	fmt.Println("Next steps:")
+	fmt.Println()
+	if i.DestinationPath != i.WorkingDir {
+		fmt.Println("    cd", i.DestinationPath)
+		fmt.Println()
+	}
+	fmt.Println("    # ... edit test.ts ...")
+	fmt.Println()
+	fmt.Println("    # verify test.ts against Flood Chrome using flood verify:")
+	fmt.Println("    flood verify test.ts")
+	fmt.Println()
 
 	return
 }
@@ -84,6 +109,19 @@ func (i *InitCmd) interactiveConfig(name string) (err error) {
 
 	i.Name = name
 
+	query = "Test URL"
+	url, err := ui.Ask(query, &input.Options{
+		Default:  i.URL,
+		Required: true,
+		Loop:     true,
+	})
+	if err != nil {
+		return
+	}
+
+	i.Name = name
+	i.URL = url
+
 	return
 }
 
@@ -96,7 +134,9 @@ func (i *InitCmd) destinationExists() bool {
 }
 
 func (i *InitCmd) validateDestination() (err error) {
-	fmt.Println("validating destination path", i.DestinationPath)
+	if i.Validated {
+		return
+	}
 
 	dir, err := os.Open(i.DestinationPath)
 	if err != nil {
@@ -110,13 +150,18 @@ func (i *InitCmd) validateDestination() (err error) {
 	}
 
 	if len(names) > 0 {
+		fmt.Println()
+		errMsg := fmt.Sprint(au.Red("destination"), au.Gray(i.DestinationPath), au.Red("isn't empty!"))
 		if i.Force {
-			fmt.Printf("destination isn't empty! (%s)\nYou specified --force so continuing anyway...\n", i.DestinationPath)
+			fmt.Println(errMsg)
+			fmt.Println("However you specified", au.Blue("--force"), "so continuing anyway")
 			return nil
 		} else {
-			return fmt.Errorf("destination isn't empty! (%s)", i.DestinationPath)
+			return fmt.Errorf(errMsg)
 		}
 	}
+
+	i.Validated = true
 
 	return nil
 }
@@ -128,7 +173,10 @@ func (i *InitCmd) createDestination() (err error) {
 func (i *InitCmd) populateDestination() (err error) {
 	names := initskeleton.AssetNames()
 
+	fmt.Println()
+	fmt.Println(au.Green("adding files"))
 	for _, name := range names {
+		fmt.Println(" -", au.Green(name))
 		if name == "test.ts" {
 			i.reifyTemplate(name)
 		} else {

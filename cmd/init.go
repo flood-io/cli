@@ -1,9 +1,11 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	initPkg "github.com/flood-io/cli/cmd/init"
+	au "github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"
 )
 
@@ -12,8 +14,40 @@ var initImpl initPkg.InitCmd
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialises a Flood Chrome test script and TypeScript environment",
-	Long:  `TODO`,
-	Args:  cobra.MaximumNArgs(1),
+	Long: au.Gray("flood init").String() + ` initialises a sample Flood Chrome test
+script and TypeScript environment to get you started using Flood Chrome.
+
+The test script 'test.ts' gives you the general structure of a Flood Chrome test
+script.
+
+The TypeScript environment provides our recommended configuration for use with 
+an intelligent editor such as Microsoft VSCode. Using such an editor to write 
+your Flood Chrome test script gives you programming super powers such as 
+autocompletion and in-line documentation.
+
+'flood init' won't write files to a non-empty directory unless your force it with
+--force.
+
+Example: 
+	flood init my-load test --url https://load-test-target.com
+	# your test env is initialised
+
+Example: using interactive config
+	mkdir my-load-test
+	cd my-load-test
+	flood init 
+	# (now follow the prompts to configure your test scripts:)
+	~~~ Flood Chrome Init ~~~
+	Project name
+	Enter a value (Default is my-load-test): [hit enter]
+
+	Test URL
+	Enter a value (Default is https://challenge.flood.io/): [type your test url, hit enter]
+
+	# your test env is initialised
+
+	`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := ""
 		if len(args) > 0 {
@@ -22,7 +56,8 @@ var initCmd = &cobra.Command{
 
 		err := initImpl.Run(name)
 		if err != nil {
-			log.Fatalf("failed to run flood init: %s", err)
+			fmt.Fprintln(os.Stderr, "failed to run flood init:", err)
+			os.Exit(1)
 		}
 	},
 }
