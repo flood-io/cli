@@ -4,12 +4,18 @@ release:
     owner: flood-io
     name: cli
   name_template: '{{.Tag}}'
+  prerelease: true
 
-# brew:
-  # commit_author:
-    # name: goreleaserbot
-    # email: goreleaser@carlosbecker.com
-  # install: bin.install "cli"
+brew:
+  github:
+    owner: flood-io
+    name: homebrew-taps
+  folder: Formula
+  description: Flood IO Command Line Interface
+  homepage: "https://github.com/flood-io/cli"
+  install: bin.install "flood"
+  test: system bin/"flood", "version"
+
 
 builds:
 - goos:
