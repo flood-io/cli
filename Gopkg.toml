@@ -49,3 +49,7 @@
 [[constraint]]
   name = "github.com/vbauerster/mpb"
   version = "3.0.4"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/logrusorgru/aurora"
