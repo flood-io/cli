@@ -20,6 +20,10 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+required = [
+    'github.com/jteeuwen/go-bindata/go-bindata'
+    ]
+
 
 [[constraint]]
   branch = "feature/floodchrome"
@@ -53,3 +57,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/logrusorgru/aurora"
+
+[[constraint]]
+  name = "github.com/jteeuwen/go-bindata"
+  version = "3.0.7"

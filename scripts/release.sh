@@ -6,6 +6,8 @@ HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 
 cd $HERE/..
 
+./scripts/build-static.sh
+
 BUMP=${1:-patch}
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
