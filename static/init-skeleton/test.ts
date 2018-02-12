@@ -16,7 +16,7 @@ export const settings: TestSettings = {
  */
 export default () => {
 	step('Test: Start', async (browser: Driver) => {
-		await browser.visit('{{.Url}}')
+		await browser.visit('{{.URL}}')
 
 		assert(true, 'congratulations!')
 	})
