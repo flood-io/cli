@@ -65,7 +65,7 @@ Verify that your script is compiling and running correctly, and is testing the c
 - Use `console.log` and `assert` to ensure your test is working correctly.
 - Set a unique value for `settings.userAgent` and search for it in your logs.
 
-Each time fix or tweak your script then, return to step 2 and re-run it.
+Each time you fix or tweak your script, return to step 2 and re-run it.
 
 ### 4. Launch a scaled up Flood at Flood IO
 
@@ -88,7 +88,7 @@ Flood account:
     $ flood login
 
     What's your username:
-    Enter a value: user@exampe.com
+    Enter a value: user@example.com
 
     What's your password (masked):
     Enter a value: **************************************************
