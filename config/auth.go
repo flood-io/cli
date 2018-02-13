@@ -31,6 +31,7 @@ type AuthCache interface {
 	FullName() string
 	Token() string
 	MustToken() string
+	RefreshToken() string
 }
 
 type FileAuthCache struct {
@@ -145,6 +146,9 @@ func (c *FileAuthCache) SetAuthData(dataBytes []byte) (err error) {
 		return errors.Wrapf(err, "unable to write auth cache to '%s'", c.path)
 	}
 
+	// force a re-read
+	c.data = nil
+
 	return
 }
 
@@ -183,6 +187,15 @@ func (c *FileAuthCache) Token() string {
 func (c *FileAuthCache) MustToken() string {
 	c.MustLoggedIn()
 	return c.Token()
+}
+
+func (c *FileAuthCache) RefreshToken() string {
+	switch c.State() {
+	case LoggedIn, Expired:
+		return c.data.RefreshToken
+	default:
+		return ""
+	}
 }
 
 func (c *FileAuthCache) MustLoggedIn() {
