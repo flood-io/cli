@@ -16,7 +16,6 @@ brew:
   install: bin.install "flood"
   test: system bin/"flood", "version"
 
-
 builds:
 - goos:
   - linux
@@ -41,25 +40,8 @@ archive:
     - goos: darwin
       format: zip
 
-
-# fpm:
-  # name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
-    # }}v{{ .Arm }}{{ end }}'
-  # bindir: /usr/local/bin
-# snapcraft:
-  # name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
-    # }}v{{ .Arm }}{{ end }}'
 snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+  name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
 dist: dist
-# sign:
-  # cmd: gpg
-  # args:
-  # - --output
-  # - $signature
-  # - --detach-sig
-  # - $artifact
-  # signature: ${artifact}.sig
-  # artifacts: none

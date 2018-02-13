@@ -4,11 +4,17 @@ The Flood IO Command Line Interface
 
 ## Installation
 
-Download the [latest release](https://github.com/flood-io/cli/releases/latest) for your platform, then extract and install it:
+On macOS, install using homebrew
 ```bash
-# assuming you're installing version 0.2.0 on macos (aka 'darwin')
+brew install flood-io/taps/flood
+```
+
+On linux, download the [latest release](https://github.com/flood-io/cli/releases/latest) for your platform, then extract and install it:
+```bash
+# assuming you're installing version 1.0.0 on linux
 cd ~/Downloads
-unzip -d flood flood-0.2.0-darwin-amd64.zip
+mkdir flood
+tar zxvf flood-1.0.0-linux-amd64.zip -C flood
 
 # move the file to somewhere on your $PATH:
 mv flood/flood /usr/local/bin/flood
