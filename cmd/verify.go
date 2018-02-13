@@ -1,10 +1,13 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	verifyPkg "github.com/flood-io/cli/cmd/verify"
 	"github.com/flood-io/cli/config"
+	"github.com/flood-io/cli/oauthclient"
+	au "github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"
 )
 
@@ -20,16 +23,24 @@ Once its ready, use the script to run a full load test at high concurrency via F
 	`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		authToken := config.DefaultAuthCache().MustToken()
-
+		fmt.Println(au.Blue("~~~ Flood Chrome"), au.Green("Verify"), au.Blue("~~~"))
 		var err error
+
+		authToken, err := oauthclient.GetAuthToken(config.DefaultAuthCache())
+		if err != nil {
+			fmt.Printf("Failed to get auth token: %s\n", err)
+			fmt.Println("Please log in with", au.Gray("flood login"))
+			os.Exit(1)
+		}
+
 		if verify.LaunchDevtoolsMode {
 			err = verify.LaunchDevtools()
 		} else {
 			err = verify.Run(authToken, args[0])
 		}
 		if err != nil {
-			log.Fatalf("failed to run verify %s", err)
+			fmt.Printf("failed to run verify %s\n", err)
+			os.Exit(1)
 		}
 	},
 }
