@@ -4,7 +4,7 @@ release:
     owner: flood-io
     name: cli
   name_template: '{{.Tag}}'
-  prerelease: true
+  prerelease: false
 
 brew:
   github:
