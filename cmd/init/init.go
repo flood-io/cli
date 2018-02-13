@@ -73,16 +73,22 @@ func (i *InitCmd) Run(name string) (err error) {
 	fmt.Println(au.Green("done"))
 	fmt.Println()
 	fmt.Println("Next steps:")
-	fmt.Println()
 	if i.DestinationPath != i.WorkingDir {
-		fmt.Println("    cd", i.DestinationPath)
 		fmt.Println()
+		fmt.Println("    cd", i.DestinationPath)
 	}
-	fmt.Println("    # ... edit test.ts ...")
-	fmt.Println()
-	fmt.Println("    # verify test.ts against Flood Chrome using flood verify:")
-	fmt.Println("    flood verify test.ts")
-	fmt.Println()
+	fmt.Println(`
+    # install node packages using yarn
+    yarn
+    # or npm
+    npm i
+
+    # edit test.ts using e.g. vs code:
+    code test.ts
+
+    # verify test.ts against Flood Chrome using flood verify:
+    flood verify test.ts
+`)
 
 	return
 }
