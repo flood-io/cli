@@ -49,11 +49,10 @@ func Login(force bool, cache config.AuthCache) (err error) {
 
 	switch cache.State() {
 	case config.LoggedIn:
-		fmt.Printf("You're already signed in as %s\n", cache.FullName())
+		fmt.Printf("You're already logged in as %s\n", cache.FullName())
 		return
 	case config.Expired:
-		fmt.Printf("Your auth token has expired. Please re-log in:\n")
-		cache.Clear()
+		return LoginRefresh(force, cache)
 	default:
 		fmt.Println("Please re-log in with your flood.io credentials:")
 	}
