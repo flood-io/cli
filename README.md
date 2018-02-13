@@ -4,7 +4,7 @@ The Flood IO Command Line Interface
 
 ## Installation
 
-On macOS, install using homebrew
+On macOS, install using homebrew:
 ```bash
 brew install flood-io/taps/flood
 ```
@@ -38,36 +38,21 @@ real-but-unscaled instance of Flood Chrome.
 Scripts are written in TypeScript (or Javascript, but we strongly recommend TypeScript to help write your scripts more quickly and robustly).
 Full Flood Chrome script documentation is available [here TBA](http://help.flood.io/).
 
-```javascript
-// cart-test.ts
-import { step, TestSettings, Until, By, MouseButtons, Device, Driver } from '@flood/chrome'
-import * as assert from 'assert'
-export const settings: TestSettings = {
-  userAgent: 'my-flood-io-cart-test/1.0',
-  disableCache: true,
-  actionDelay: 0.5,
-  stepDelay: 2.5,
-}
+```bash
+cd ~/dev
+flood init cart-test
 
-/**
- * My Cart Script
- * This script tests out the shopping cart flow
- * for our site.
- */
-export default () => {
-  step('My Cart', async (browser: Driver) => {
-    await browser.visit('https://challenge.flood.io')
-    // ... add more actions, verification etc
-  })
-  step('My Cart: item added', async (browser: Driver) => {
-    // ... add your actions, verification etc
-  })
-}
+# flood init creates some files for you to get started
+
+cd cart-test
 ```
+
+Now edit `test.ts` to implement your test (*Hint*: if you don't already have a go-to code editor, we recommend [Microsoft Visual Studio Code](https://code.visualstudio.com/) as it works
+particularly well with TypeScript as used by Flood Chrome.)
 
 ### 2. Run the script
 ```bash
-flood verify cart-test.ts
+flood verify test.ts
 ```
 
 **Note** that you must first log in using `flood login` and your Flood IO credentials ([see below](#authenticating))
@@ -85,9 +70,9 @@ Each time fix or tweak your script then, return to step 2 and re-run it.
 ### 4. Launch a scaled up Flood at Flood IO
 
 Once you're happy with the operation of your test script, visit https://flood.io to create a Flood.
-Here, you can run your script on up to 50 Flood Chrome instances per Flood node for simulating thousands of browser users.
+Here you can run your script on up to 50 Flood Chrome instances per Flood node for simulating thousands of browser users.
 
-(**Note** we have plans to expand this CLI to allow running fully scaled Floods directly from the command line)
+(**Note** we plan to expand this CLI to allow running fully scaled Floods directly from the command line)
 
 ## Usage
 
