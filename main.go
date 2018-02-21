@@ -22,12 +22,22 @@ func init() {
 func main() {
 	// logger := log.New(os.Stderr, "", log.Lshortfile)
 
+	releaseStage := "development"
+	if version != "dev" {
+		releaseStage = "production"
+	}
+
 	bugsnag.Configure(bugsnag.Configuration{
 		// Your Bugsnag project API key
 		APIKey: bugsnagAPIKey,
+
 		// The development stage of your application build, like "alpha" or
 		// "production"
-		ReleaseStage: "production",
+		ReleaseStage: releaseStage,
+
+		// only notify once released
+		NotifyReleaseStages: []string{"production"},
+
 		// The import paths for the Go packages containing your source files
 		ProjectPackages: []string{"main", "github.com/flood-io/cli*", "github.com/flood-io/go-wrenches*"},
 
