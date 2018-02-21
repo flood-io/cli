@@ -12,5 +12,5 @@ if [[ $BUILDKITE_TAG ]]; then
     # XXX if ops becomes multi-machine handle this!
     # docker pull $DOCKER_IMAGE
   # fi
-  docker run --rm --env GITHUB_TOKEN $DOCKER_IMAGE make release
+  docker run --rm --env GITHUB_TOKEN --env BUGSNAG_API_KEY $DOCKER_IMAGE make release
 fi
