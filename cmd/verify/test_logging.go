@@ -56,12 +56,13 @@ func (t *LoggingTest) ScriptError(message string, scriptErr *pb.TestResult_Error
 
 	// NOTE this is assuming 4-space-tabs
 	// Column is in spaces even when the code is in tabs
-	c := scriptErr.Callsite
-	fmt.Println(strings.Replace(c.Code, "\t", "    ", -1))
-	fmt.Printf("%s^\n", strings.Repeat(" ", int(c.Column)))
+	if c := scriptErr.Callsite; c != nil {
+		fmt.Println(strings.Replace(c.Code, "\t", "    ", -1))
+		fmt.Printf("%s^\n", strings.Repeat(" ", int(c.Column)))
 
-	for _, line := range scriptErr.Stack {
-		fmt.Println(line)
+		for _, line := range scriptErr.Stack {
+			fmt.Println(line)
+		}
 	}
 
 	t.Println()
