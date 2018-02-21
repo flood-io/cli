@@ -101,7 +101,6 @@ func (t *LoggingTest) ScriptLog(level, message string) {
 func (t *LoggingTest) AssertConfigured() {
 	t.WrappedTest().AssertConfigured()
 
-	t.Println(au.Blue("~~~ Flood Chrome"), au.Green("Verify"), au.Blue("~~~"))
 	t.Printfln("%-17s : %s", au.Gray("test script"), t.GetScriptPath())
 	t.Printfln("%-17s : %s", au.Gray("requested channel"), t.GetChannel())
 	t.Println()
