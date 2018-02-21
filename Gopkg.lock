@@ -2,6 +2,18 @@
 
 
 [[projects]]
+  name = "github.com/bugsnag/bugsnag-go"
+  packages = [".","errors"]
+  revision = "036f1af2a63f8133e596d1c127c86100b4642ba1"
+  version = "v1.3.0"
+
+[[projects]]
+  name = "github.com/bugsnag/panicwrap"
+  packages = ["."]
+  revision = "4009b2b7c78d820cc4a2e42f035bb557ce4ae45b"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -48,6 +60,12 @@
   packages = [".","go-bindata"]
   revision = "bbd0c6e271208dce66d8fda4bc536453cd27fc4a"
   version = "v3.0.7"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kardianos/osext"
+  packages = ["."]
+  revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
 
 [[projects]]
   branch = "master"
@@ -142,6 +160,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3ab42406ea56323f09d03b4b0e8242852b08b813ed1fb6f2b853a43e7db6d49c"
+  inputs-digest = "2d673c0f9628121773c199b6b639ea6260316d95d68e26c19a303753e77273ef"
   solver-name = "gps-cdcl"
   solver-version = 1
