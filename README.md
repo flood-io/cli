@@ -14,7 +14,7 @@ On linux, download the [latest release](https://github.com/flood-io/cli/releases
 # assuming you're installing version 1.0.0 on linux
 cd ~/Downloads
 mkdir flood
-tar zxvf flood-1.0.0-linux-amd64.zip -C flood
+tar zxvf flood-1.0.0-linux-amd64.tar.gz -C flood
 
 # move the file to somewhere on your $PATH:
 mv flood/flood /usr/local/bin/flood
