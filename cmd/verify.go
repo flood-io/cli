@@ -48,7 +48,7 @@ Once its ready, use the script to run a full load test at high concurrency via F
 func init() {
 	RootCmd.AddCommand(verifyCmd)
 
-	verifyCmd.Flags().StringVar(&verify.FloodChromeChannel, "channel", "beta", "launch the latest flood chrome on <channel>.")
+	verifyCmd.Flags().StringVar(&verify.FloodChromeChannel, "channel", "stable", "launch the latest flood chrome on <channel>.")
 	verifyCmd.Flags().BoolVarP(&verify.Verbose, "verbose", "v", false, "print a lot of messages")
 
 	// hidden dev-only flags
