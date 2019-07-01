@@ -2,14 +2,16 @@ steps:
   - command: "scripts/ci/build.sh"
     label: ":hammer: Build ting"
     agents:
-      agent: "buildbox"
+      agent: "k8s"
+      queue: "continuous-integration"
 
   - "wait"
 
   - command: "scripts/ci/test.sh"
     label: ":llama: Test ting"
     agents:
-      agent: "buildbox"
+      agent: "k8s"
+      queue: "continuous-integration"
     concurrency: 1
     concurrency_group: "tests"
 
@@ -18,4 +20,5 @@ steps:
   - command: "scripts/ci/release.sh"
     label: ":octocat: GitHub release that ting"
     agents:
-      agent: "buildbox"
+      agent: "k8s"
+      queue: "continuous-integration"
